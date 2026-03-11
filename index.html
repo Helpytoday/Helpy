@@ -201,6 +201,13 @@ button{font:inherit;cursor:pointer;border:none;border-radius:10px;font-weight:60
 .profile-section-title{font-family:'Fraunces',serif;font-size:1rem;font-weight:600;margin:0 0 .8rem;color:var(--bark2)}
 .profile-gate{text-align:center;padding:2.5rem 1rem}
 .profile-gate p{color:var(--muted);margin:0 0 1.1rem;font-size:.95rem}
+/* ── SEARCH ── */
+.search-wrap{position:relative;margin-bottom:1rem}
+.search-wrap input{width:100%;font:inherit;padding:.58rem .85rem .58rem 2.2rem;border:1.5px solid var(--border);border-radius:10px;background:#fff;color:var(--bark);font-size:.92rem;transition:border-color .15s,box-shadow .15s}
+.search-wrap input:focus{outline:none;border-color:var(--moss);box-shadow:0 0 0 3px rgba(58,107,74,.12)}
+.search-icon{position:absolute;left:.7rem;top:50%;transform:translateY(-50%);font-size:.95rem;pointer-events:none}
+.search-clear{position:absolute;right:.7rem;top:50%;transform:translateY(-50%);background:none;border:none;font-size:.95rem;cursor:pointer;color:var(--muted);padding:0;line-height:1;display:none}
+.search-clear.visible{display:block}
 /* ── FEEDBACK ── */
 #feedbackBtn{position:fixed;bottom:1.5rem;right:1.5rem;z-index:300;background:var(--bark);color:var(--sand);border:none;border-radius:999px;padding:.6rem 1.1rem;font-size:.85rem;font-weight:600;cursor:pointer;font:inherit;box-shadow:0 4px 16px rgba(0,0,0,.22);display:flex;align-items:center;gap:.4rem;transition:background .15s,transform .15s}
 #feedbackBtn:hover{background:var(--bark2);transform:translateY(-2px)}
@@ -363,6 +370,11 @@ button{font:inherit;cursor:pointer;border:none;border-radius:10px;font-weight:60
       <span id="radiusStatus" style="font-size:.8rem;color:var(--muted)">Posts outside this range are hidden</span>
     </div>
 
+    <div class="search-wrap">
+      <span class="search-icon">🔍</span>
+      <input type="text" id="searchInput" placeholder="Search posts…" maxlength="100" />
+      <button class="search-clear" id="searchClear">✕</button>
+    </div>
     <ul id="postList" class="list" aria-live="polite"></ul>
     <div id="emptyState" class="empty-state">
       <p>🌱 No requests yet — be the first to ask for help!</p>
@@ -473,7 +485,7 @@ import { getDatabase, ref, push, remove, update, onValue, query, orderByChild, r
   from "https://www.gstatic.com/firebasejs/11.4.0/firebase-database.js";
 import { getAuth, onAuthStateChanged, signOut,
   createUserWithEmailAndPassword, signInWithEmailAndPassword,
-  updateProfile, GoogleAuthProvider, signInWithPopup }
+  updateProfile, GoogleAuthProvider, signInWithPopup, signInWithRedirect, getRedirectResult }
   from "https://www.gstatic.com/firebasejs/11.4.0/firebase-auth.js";
 
 const firebaseConfig = {
@@ -491,7 +503,7 @@ const BAD_WORDS=["fuck","shit","bitch","asshole","bastard"];
 const RATE_MS=30000,LS_LAST="nhn_last_post_at",LS_CLIENT="nhn_client_id";
 
 let db,postsRef,auth,currentUser=null,latestPosts=null;
-let selFilter="All",selStatus="all",selSort="newest";
+let selFilter="All",selStatus="all",selSort="newest",searchQuery="";
 let userLat=null,userLng=null,viewRadiusMiles=5,radiusEnabled=false;
 let postRadiusMiles=5,postRadiusEnabled=false;
 let leafMap=null,leafMarkers={};
@@ -638,6 +650,7 @@ function renderFromData(data){
   let items=Object.entries(data).filter(([,p])=>{
     if(p.expiresAt&&p.expiresAt<=Date.now())return false;
     if(selFilter!=="All"&&(p.helpType||"Other")!==selFilter)return false;
+    if(searchQuery){const q=searchQuery.toLowerCase();if(!(p.title||"").toLowerCase().includes(q)&&!(p.description||"").toLowerCase().includes(q)&&!(p.posterName||"").toLowerCase().includes(q))return false;}
     if(selStatus==="open"&&p.volunteered)return false;
     if(selStatus==="done"&&!p.volunteered)return false;
     if(selStatus==="urgent"&&!p.urgent)return false;
@@ -936,6 +949,38 @@ function renderProfile(user){
 
 
 
+
+// ── NOTIFICATIONS ──────────────────────────────────────────────
+let notifEnabled=false;
+let knownVolunteered=new Set();
+
+async function requestNotifPermission(){
+  if(!("Notification" in window))return;
+  if(Notification.permission==="granted"){notifEnabled=true;return;}
+  if(Notification.permission==="denied")return;
+  const perm=await Notification.requestPermission();
+  notifEnabled=perm==="granted";
+}
+
+function checkVolunteerNotifs(data){
+  if(!data||!currentUser)return;
+  Object.entries(data).forEach(([id,p])=>{
+    if(p.ownerId!==currentUser.uid)return;
+    if(!p.volunteered)return;
+    if(knownVolunteered.has(id))return;
+    knownVolunteered.add(id);
+    if(notifEnabled){
+      const n=new Notification("🤝 Someone volunteered on Helpy!",{
+        body:`${p.volunteerName||"Someone"} offered to help with "${p.title}"`,
+        icon:"https://fonts.gstatic.com/s/i/short-term/release/materialsymbolsoutlined/favorite/default/24px.svg"
+      });
+      n.onclick=()=>{window.focus();setTab("help");};
+    } else {
+      toast(`🤝 ${p.volunteerName||"Someone"} volunteered for "${p.title}"!`);
+    }
+  });
+}
+
 // ── SIDEBAR TOGGLE ─────────────────────────────────────────────
 function initSidebar(){
   const sidebar=document.getElementById("sidebar");
@@ -1010,9 +1055,13 @@ function init(){
     const app=initializeApp(firebaseConfig);
     db=getDatabase(app);postsRef=ref(db,"posts");
     auth=getAuth(app);
+    getRedirectResult(auth).then(result=>{
+      if(result&&result.user){hideAuthOverlay();toast("Welcome! 🌿");}
+    }).catch(e=>{if(e.code!=="auth/no-current-user")console.error(e);});
     onAuthStateChanged(auth,user=>{
       currentUser=user;
       updateHeaderAuth(user);
+      if(user)requestNotifPermission();
       if(el.profilePanel&&!el.profilePanel.hidden)renderProfile(user);
       if(user&&el.posterName&&!el.posterName.value){
         const name=user.displayName||(user.email||"").split("@")[0];
@@ -1021,10 +1070,23 @@ function init(){
       renderFromData(latestPosts);
     });
     onValue(query(postsRef,orderByChild("createdAt")),snap=>{
+      const isFirstLoad=latestPosts===null;
       latestPosts=snap.exists()?snap.val():null;
+      if(isFirstLoad&&latestPosts){Object.entries(latestPosts).forEach(([id,p])=>{if(p.volunteered)knownVolunteered.add(id);});}
       renderFromData(latestPosts);updateMap(latestPosts);
+      checkVolunteerNotifs(latestPosts);
     });
     el.filterType.onchange=e=>{selFilter=e.target.value;renderFromData(latestPosts);};
+    document.getElementById("searchInput").oninput=e=>{
+      searchQuery=e.target.value.trim();
+      document.getElementById("searchClear").classList.toggle("visible",searchQuery.length>0);
+      renderFromData(latestPosts);
+    };
+    document.getElementById("searchClear").onclick=()=>{
+      searchQuery="";document.getElementById("searchInput").value="";
+      document.getElementById("searchClear").classList.remove("visible");
+      renderFromData(latestPosts);
+    };
     el.filterStatus.onchange=e=>{selStatus=e.target.value;renderFromData(latestPosts);};
     el.sortMode.onchange=e=>{selSort=e.target.value;renderFromData(latestPosts);};
     el.postForm.onsubmit=submitPost;
@@ -1037,10 +1099,10 @@ function init(){
     el.authOverlay.onclick=e=>{if(e.target===el.authOverlay)hideAuthOverlay();};
     el.authTabSignIn.onclick=()=>switchAuthMode("signin");
     el.authTabSignUp.onclick=()=>switchAuthMode("signup");
-    el.btnGoogle.onclick=async()=>{
+    el.btnGoogle.onclick=()=>{
       el.authError.hidden=true;
-      try{await signInWithPopup(auth,new GoogleAuthProvider());hideAuthOverlay();toast("Welcome! 🌿");}
-      catch(e){showAuthError(e.code==="auth/popup-closed-by-user"?"Sign-in cancelled.":"Google sign-in failed. Try again.");}
+      try{signInWithRedirect(auth,new GoogleAuthProvider());}
+      catch(e){showAuthError("Google sign-in failed. Try again.");}
     };
     el.authSubmit.onclick=async()=>{
       const email=el.authEmail.value.trim(),pass=el.authPassword.value;
@@ -1049,7 +1111,7 @@ function init(){
       try{
         if(authMode==="signup"){
           const name=el.authName.value.trim();
-          if(!name)return showAuthError("Please enter your display name.");
+          if(!name){el.authSubmit.disabled=false;return showAuthError("Please enter your display name.");}
           const cred=await createUserWithEmailAndPassword(auth,email,pass);
           await updateProfile(cred.user,{displayName:name});
           currentUser=auth.currentUser;
@@ -1071,21 +1133,24 @@ function init(){
       if(!navigator.geolocation)return toast("Geolocation not supported on this device.","err");
       el.locBtn.textContent="📍 Getting…";
       navigator.geolocation.getCurrentPosition(async pos=>{
-        userLat=pos.coords.latitude;userLng=pos.coords.longitude;
-        el.locBtn.textContent="✓ Got it";
-        el.locBtn.classList.add("got");
-        // Reverse geocode to fill address field so user can verify/correct
         try{
+          userLat=pos.coords.latitude;userLng=pos.coords.longitude;
+          el.locBtn.textContent="✓ Got it";
+          el.locBtn.classList.add("got");
+          // Reverse geocode to fill address field so user can verify/correct
           const r=await fetch(`https://nominatim.openstreetmap.org/reverse?lat=${userLat}&lon=${userLng}&format=json`,{headers:{"User-Agent":"Helpy-App/1.0"}});
           const d=await r.json();
           if(d&&d.display_name&&!el.address.value){
             const parts=[d.address?.house_number,d.address?.road,d.address?.city||d.address?.town||d.address?.village,d.address?.state].filter(Boolean);
             el.address.value=parts.join(", ");
           }
-        }catch{}
-        renderFromData(latestPosts);
-        updateMap(latestPosts);
-        toast("Location captured! Check address below ✓");
+          renderFromData(latestPosts);
+          updateMap(latestPosts);
+          toast("Location captured! Check address below ✓");
+        }catch{
+          el.locBtn.textContent="📍 My Location";el.locBtn.classList.remove("got");
+          toast("Couldn't get location details. Try again.","err");
+        }
       },(err)=>{
         el.locBtn.textContent="📍 My Location";
         if(err.code===1)toast("Location permission denied. Please allow it in your browser.","err");
