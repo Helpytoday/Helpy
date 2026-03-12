@@ -1099,10 +1099,15 @@ function init(){
     el.authOverlay.onclick=e=>{if(e.target===el.authOverlay)hideAuthOverlay();};
     el.authTabSignIn.onclick=()=>switchAuthMode("signin");
     el.authTabSignUp.onclick=()=>switchAuthMode("signup");
-    el.btnGoogle.onclick=()=>{
+    el.btnGoogle.onclick=async()=>{
       el.authError.hidden=true;
-      try{signInWithRedirect(auth,new GoogleAuthProvider());}
-      catch(e){showAuthError("Google sign-in failed. Try again.");}
+      try{
+        const provider=new GoogleAuthProvider();
+        await signInWithRedirect(auth,provider);
+      }catch(e){
+        console.error("Google redirect error:",e);
+        showAuthError(e.message||"Google sign-in failed. Try again.");
+      }
     };
     el.authSubmit.onclick=async()=>{
       const email=el.authEmail.value.trim(),pass=el.authPassword.value;
