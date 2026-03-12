@@ -1056,8 +1056,17 @@ function init(){
     db=getDatabase(app);postsRef=ref(db,"posts");
     auth=getAuth(app);
     getRedirectResult(auth).then(result=>{
-      if(result&&result.user){hideAuthOverlay();toast("Welcome! 🌿");}
-    }).catch(e=>{if(e.code!=="auth/no-current-user")console.error(e);});
+      if(result&&result.user){
+        currentUser=result.user;
+        updateHeaderAuth(result.user);
+        hideAuthOverlay();
+        toast("Welcome! 🌿");
+        if(el.posterName&&!el.posterName.value){
+          const n=result.user.displayName||(result.user.email||"").split("@")[0];
+          el.posterName.value=n;
+        }
+      }
+    }).catch(e=>{console.error("Redirect result error:",e);});
     onAuthStateChanged(auth,user=>{
       currentUser=user;
       updateHeaderAuth(user);
