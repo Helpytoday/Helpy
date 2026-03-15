@@ -281,6 +281,8 @@ button{font:inherit;cursor:pointer;border:none;border-radius:10px;font-weight:60
 .landing-logo{font-family:'Fraunces',serif;font-size:1.5rem;font-weight:700;color:var(--sand);letter-spacing:-.02em;display:flex;align-items:center;gap:.3rem}
 .landing-logo span{color:var(--sage)}
 .landing-header-btns{display:flex;gap:.6rem}
+.btn-landing-guest{background:transparent;color:#b8a98e;border:1.5px solid rgba(255,255,255,.2);border-radius:8px;padding:.4rem 1rem;font-size:.88rem;font-weight:600;cursor:pointer;font:inherit;transition:all .15s}
+.btn-landing-guest:hover{border-color:var(--sage);color:var(--sage)}
 .btn-landing-signin{background:transparent;color:var(--sand);border:1.5px solid rgba(255,255,255,.3);border-radius:8px;padding:.4rem 1rem;font-size:.88rem;font-weight:600;cursor:pointer;font:inherit;transition:all .15s}
 .btn-landing-signin:hover{border-color:var(--sage);color:var(--sage)}
 .btn-landing-signup{background:var(--moss);color:#fff;border:none;border-radius:8px;padding:.4rem 1rem;font-size:.88rem;font-weight:600;cursor:pointer;font:inherit;transition:background .15s}
@@ -610,6 +612,7 @@ button{font:inherit;cursor:pointer;border:none;border-radius:10px;font-weight:60
     <div class="landing-header-inner">
       <div class="landing-logo"><span style="font-size:1.1rem;opacity:.8">✦</span>&nbsp;Helpy<span>.</span></div>
       <div class="landing-header-btns">
+        <button class="btn-landing-guest" id="landingHeaderBrowse">Browse as guest</button>
         <button class="btn-landing-signin" id="landingSignIn">Sign in</button>
         <button class="btn-landing-signup" id="landingSignUp">Create account</button>
       </div>
@@ -1640,6 +1643,10 @@ function initLanding(){
     localStorage.setItem('nhn_landing_seen','1');
     hideLanding();
   };
+  document.getElementById('landingHeaderBrowse').onclick=()=>{
+    localStorage.setItem('nhn_landing_seen','1');
+    hideLanding();
+  };
 }
 
 
@@ -2112,7 +2119,7 @@ init();
 
     <div class="legal-divider"></div>
     <h3>6. Contact</h3>
-    <p>Questions? Email us at <a href="mailto:hello@helpy.app" style="color:var(--moss)">hello@helpy.app</a>.</p>
+        <p>Questions? Email us at <a href="mailto:hello@helpy.app" style="color:var(--moss)">hello@helpy.app</a>.</p>
   </div>
 </div>
 
