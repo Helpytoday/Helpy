@@ -293,6 +293,31 @@ button{font:inherit;cursor:pointer;border:none;border-radius:10px;font-weight:60
   .landing-hero h1{font-size:2.2rem}
   .landing-steps{flex-direction:column;align-items:center}
 }
+
+/* ── NOTIFICATION BADGE ── */
+.tab{position:relative}
+.notif-badge{position:absolute;top:6px;right:6px;background:#dc2626;color:#fff;border-radius:999px;font-size:.6rem;font-weight:700;min-width:16px;height:16px;display:flex;align-items:center;justify-content:center;padding:0 4px;line-height:1;border:2px solid var(--bark);pointer-events:none;display:none}
+.notif-badge.visible{display:flex}
+
+/* ── SHARE BUTTON ── */
+.btn-share{background:#f5f0e8;color:var(--bark2);padding:.38rem .75rem;font-size:.83rem;border-radius:8px;border:1.5px solid var(--border)}
+.btn-share:hover{background:#ede8df;border-color:var(--muted)}
+
+/* ── MESSAGES ── */
+.btn-msg{background:#eef4fb;color:var(--sky);padding:.38rem .75rem;font-size:.83rem;border-radius:8px;border:1.5px solid #c8ddf0}
+.btn-msg:hover{background:#dceefb}
+.btn-msg.has-unread{background:var(--sky);color:#fff;border-color:var(--sky)}
+.msg-section{margin-top:.85rem;padding-top:.85rem;border-top:1px solid var(--border)}
+.msg-item{background:var(--sand);border-radius:8px;padding:.5rem .75rem;margin-bottom:.4rem}
+.msg-author{font-size:.8rem;font-weight:600;color:var(--bark2)}
+.msg-text{font-size:.88rem;color:#4a3726;margin:.15rem 0 .2rem;word-break:break-word}
+.msg-time{font-size:.74rem;color:var(--muted)}
+.msg-add{display:flex;gap:.45rem;margin-top:.65rem}
+.msg-add input{font:inherit;padding:.42rem .7rem;font-size:.87rem;border-radius:8px;border:1.5px solid var(--border);background:#fff;color:var(--bark);flex:1}
+.msg-add input:focus{outline:none;border-color:var(--sky)}
+.msg-add button{background:var(--sky);color:#fff;padding:.42rem .85rem;border-radius:8px;font-size:.84rem;font-weight:600;white-space:nowrap;border:none}
+.msg-add button:hover{background:#3a6f95}
+.msg-lock{font-size:.82rem;color:var(--muted);font-style:italic;margin:.3rem 0}
 </style>
 </head>
 <body>
@@ -318,6 +343,7 @@ button{font:inherit;cursor:pointer;border:none;border-radius:10px;font-weight:60
     </button>
     <button id="helpTab" class="tab" type="button" title="Help Neighbors">
       <span>↗</span><span class="tab-label">Help</span>
+      <span class="notif-badge" id="helpNotifBadge"></span>
     </button>
     <button id="mapTab" class="tab" type="button" title="Map View">
       <span>▦</span><span class="tab-label">Map</span>
@@ -979,8 +1005,65 @@ function makeCard(id,p){
         contentDiv.appendChild(rateSec);
       }
     }
-    actions.append(cBtn,vBtn);
+    // Share button
+    const shareBtn=document.createElement("button");shareBtn.className="btn-share";shareBtn.type="button";shareBtn.title="Copy link";shareBtn.textContent="⎘ Share";
+    shareBtn.onclick=()=>{
+      const url=`${location.origin}${location.pathname}?post=${id}`;
+      navigator.clipboard.writeText(url).then(()=>toast("✓ Link copied")).catch(()=>toast("Couldn't copy link","err"));
+    };
+
+    // Message section (only if volunteered — between poster and volunteer)
+    const msgSec=document.createElement("div");msgSec.className="msg-section";msgSec.hidden=true;
+    const openMsgs=new Set();
+    let msgBtn=null;
+    if(p.volunteered){
+      msgBtn=document.createElement("button");msgBtn.className="btn-msg";msgBtn.type="button";
+      // Count unread msgs
+      const msgs=p.messages?Object.entries(p.messages).sort((a,b)=>a[1].createdAt-b[1].createdAt):[];
+      const lastRead=parseInt(localStorage.getItem(`msg_read_${id}`)||"0",10);
+      const unread=msgs.filter(([,m])=>m.createdAt>lastRead&&m.authorId!==(currentUser?currentUser.uid:clientId)).length;
+      msgBtn.textContent=unread>0?`💬 ${unread} new`:`💬 ${msgs.length} msgs`;
+      if(unread>0)msgBtn.classList.add("has-unread");
+
+      function buildMsgs(){
+        msgSec.innerHTML="";
+        const msgs2=p.messages?Object.entries(p.messages).sort((a,b)=>a[1].createdAt-b[1].createdAt):[];
+        if(!msgs2.length){const ep=document.createElement("p");ep.className="msg-lock";ep.textContent="No messages yet.";msgSec.appendChild(ep);}
+        else msgs2.forEach(([,m])=>{const d=document.createElement("div");d.className="msg-item";d.innerHTML=`<div class="msg-author">${esc(m.authorName||"Unknown")}</div><div class="msg-text">${esc(m.text)}</div><div class="msg-time">${timeAgo(m.createdAt)}</div>`;msgSec.appendChild(d);});
+        // Only poster or volunteer can message
+        const canMsg=isOwner||(currentUser&&p.volunteerName&&(currentUser.displayName||"").slice(0,30)===p.volunteerName.slice(0,30));
+        if(canMsg||!currentUser){
+          const form=document.createElement("div");form.className="msg-add";
+          const textIn=document.createElement("input");textIn.type="text";textIn.placeholder="Send a message…";textIn.maxLength=280;
+          const sendBtn2=document.createElement("button");sendBtn2.type="button";sendBtn2.textContent="Send";
+          sendBtn2.onclick=async()=>{
+            const text=textIn.value.trim();
+            if(!text)return;
+            if(hasBad(text))return toast("Please keep it friendly!","err");
+            const name=currentUser?(currentUser.displayName||(currentUser.email||"").split("@")[0]):"Guest";
+            try{
+              await push(ref(db,`posts/${id}/messages`),{authorName:name,authorId:currentUser?currentUser.uid:clientId,text:text.slice(0,280),createdAt:Date.now()});
+              textIn.value="";
+              localStorage.setItem(`msg_read_${id}`,String(Date.now()));
+            }catch{toast("Couldn't send.","err");}
+          };
+          form.append(textIn,sendBtn2);msgSec.appendChild(form);
+        } else {
+          const lock=document.createElement("p");lock.className="msg-lock";lock.textContent="Only the poster and volunteer can message.";msgSec.appendChild(lock);
+        }
+        // Mark as read
+        localStorage.setItem(`msg_read_${id}`,String(Date.now()));
+        if(msgBtn){msgBtn.classList.remove("has-unread");const mc=p.messages?Object.keys(p.messages).length:0;msgBtn.textContent=`💬 ${mc} msgs`;}
+      }
+      buildMsgs();
+      msgBtn.onclick=()=>{if(msgSec.hidden){msgSec.hidden=false;buildMsgs();}else{msgSec.hidden=true;}};
+    }
+
+    actions.append(cBtn, shareBtn);
+    if(msgBtn)actions.append(msgBtn);
+    actions.append(vBtn);
     contentDiv.appendChild(commSec);
+    contentDiv.appendChild(msgSec);
   }
 
   return li;
@@ -1277,6 +1360,33 @@ function initLanding(){
   };
 }
 
+
+// ── NOTIFICATION BADGE ────────────────────────────────────────
+let lastSeenPostCount = parseInt(localStorage.getItem('nhn_seen_count')||'0',10);
+function updateHelpBadge(data){
+  const badge = document.getElementById('helpNotifBadge');
+  if(!badge||!data) return;
+  const now = Date.now();
+  const posts = Object.values(data).filter(p=>!p.expiresAt||p.expiresAt>now);
+  const newCount = posts.length;
+  const unseen = Math.max(0, newCount - lastSeenPostCount);
+  if(unseen > 0 && document.getElementById('helpPanel') && document.getElementById('helpPanel').hidden){
+    badge.textContent = unseen > 9 ? '9+' : unseen;
+    badge.classList.add('visible');
+  } else {
+    badge.classList.remove('visible');
+  }
+}
+function clearHelpBadge(data){
+  const badge = document.getElementById('helpNotifBadge');
+  if(badge) badge.classList.remove('visible');
+  if(latestPosts){
+    const now = Date.now();
+    lastSeenPostCount = Object.values(latestPosts).filter(p=>!p.expiresAt||p.expiresAt>now).length;
+    localStorage.setItem('nhn_seen_count', String(lastSeenPostCount));
+  }
+}
+
 // ── INIT ──────────────────────────────────────────────────────
 function init(){
   try{
@@ -1304,7 +1414,7 @@ function init(){
       const isFirstLoad=latestPosts===null;
       latestPosts=snap.exists()?snap.val():null;
       if(isFirstLoad&&latestPosts){Object.entries(latestPosts).forEach(([id,p])=>{if(p.volunteered)knownVolunteered.add(id);});}
-      renderFromData(latestPosts);updateMap(latestPosts);
+      renderFromData(latestPosts);updateMap(latestPosts);updateHelpBadge(latestPosts);
       checkVolunteerNotifs(latestPosts);
     });
     el.filterType.onchange=e=>{selFilter=e.target.value;renderFromData(latestPosts);};
@@ -1322,7 +1432,7 @@ function init(){
     el.sortMode.onchange=e=>{selSort=e.target.value;renderFromData(latestPosts);};
     el.postForm.onsubmit=submitPost;
     el.postTab.onclick=()=>setTab("post");
-    el.helpTab.onclick=()=>setTab("help");
+    el.helpTab.onclick=()=>{setTab("help");clearHelpBadge();};
     el.mapTab.onclick=()=>setTab("map");
     el.profileTab.onclick=()=>{setTab("profile");renderProfile(currentUser);};
     // auth overlay is mandatory — no close button, no click-outside dismiss
@@ -1450,6 +1560,17 @@ function init(){
   initSidebar();
   initFeedback();
   initLanding();
+
+  // Deep link: ?post=ID
+  const urlPost = new URLSearchParams(location.search).get('post');
+  if(urlPost){
+    setTimeout(()=>{
+      setTab('help');
+      const card = document.querySelector(`[data-id="${urlPost}"]`);
+      if(card){card.scrollIntoView({behavior:'smooth',block:'center'});card.style.outline='2.5px solid var(--moss)';setTimeout(()=>card.style.outline='',2500);}
+    }, 800);
+  }
+
   }catch(err){console.error(err);toast("Firebase init failed.","err");}
 }
 init();
