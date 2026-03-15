@@ -4,6 +4,36 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>Helpy · Neighborhood Help Network</title>
+<meta name="description" content="Helpy is a neighborhood help network — post requests for small acts of help and connect with neighbors who can step up." />
+<meta property="og:title" content="Helpy · Neighborhood Help Network" />
+<meta property="og:description" content="Ask for help. Offer help. Connect with your neighbors." />
+<meta property="og:type" content="website" />
+<meta property="og:url" content="https://helpy-helpy.vercel.app" />
+<meta property="og:image" content="https://helpy-helpy.vercel.app/og-image.png" />
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:title" content="Helpy · Neighborhood Help Network" />
+<meta name="twitter:description" content="Ask for help. Offer help. Connect with your neighbors." />
+<meta name="theme-color" content="#3d2b1a" />
+<meta name="keywords" content="neighborhood help, volunteer hours, community help, local help network, neighbor help, student volunteer hours, community service" />
+<meta name="robots" content="index, follow" />
+<meta name="author" content="Helpy" />
+<link rel="canonical" href="https://helpy-helpy.vercel.app" />
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "WebApplication",
+  "name": "Helpy",
+  "url": "https://helpy-helpy.vercel.app",
+  "description": "Helpy is a neighborhood help network where people post small requests for help and neighbors volunteer. Perfect for student volunteer hours.",
+  "applicationCategory": "SocialNetworkingApplication",
+  "operatingSystem": "Web",
+  "offers": {
+    "@type": "Offer",
+    "price": "0",
+    "priceCurrency": "USD"
+  }
+}
+</script>
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;0,9..144,700&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
@@ -356,6 +386,60 @@ button{font:inherit;cursor:pointer;border:none;border-radius:10px;font-weight:60
 .landing-hours-card{flex:1;min-width:180px;max-width:220px;background:rgba(255,255,255,.12);border-radius:14px;padding:1.4rem 1rem;text-align:center;border:1px solid rgba(255,255,255,.2)}
 .landing-hours-card .stat{font-family:'Fraunces',serif;font-size:2.2rem;font-weight:700;color:#fff}
 .landing-hours-card .stat-label{font-size:.85rem;color:rgba(255,255,255,.75);margin-top:.2rem}
+
+/* ── APP MOCKUP ── */
+.landing-mockup{display:flex;justify-content:center;padding:0 1rem}
+.mockup-browser{width:100%;max-width:700px;border-radius:16px;overflow:hidden;box-shadow:0 24px 64px rgba(61,43,26,.18);border:1.5px solid var(--border)}
+.mockup-bar{background:#e8e0d4;padding:.5rem .8rem;display:flex;align-items:center;gap:.4rem}
+.mockup-dot{width:12px;height:12px;border-radius:50%;display:inline-block}
+.mockup-url{margin-left:.6rem;font-size:.75rem;color:var(--muted);background:#fff;border-radius:6px;padding:.15rem .6rem;flex:1;max-width:200px}
+.mockup-body{display:flex;background:var(--sand);min-height:280px}
+.mockup-sidebar{width:70px;background:#3d2b1a;display:flex;flex-direction:column;align-items:center;padding:.8rem 0;gap:.3rem;flex-shrink:0}
+.mockup-tab{width:50px;padding:.4rem;border-radius:10px;text-align:center;font-size:.9rem;color:#b8a98e;cursor:default;line-height:1.3}
+.mockup-tab small{font-size:.5rem;font-family:'DM Sans',sans-serif;font-weight:600;display:block;margin-top:.1rem}
+.mockup-tab.active-tab{background:#3a6b4a;color:#fff}
+.mockup-content{flex:1;padding:1rem;display:flex;flex-direction:column;gap:.7rem;overflow:hidden}
+.mockup-card{background:#fff;border:1.5px solid #ddd5c3;border-radius:10px;padding:.8rem;flex-shrink:0}
+.mockup-card.urgent-card{border-color:#fca5a5;background:#fffafa}
+.mockup-card-top{display:flex;gap:.4rem;margin-bottom:.4rem;flex-wrap:wrap}
+.mockup-chip{font-size:.65rem;font-weight:700;padding:.15rem .45rem;border-radius:999px}
+.mockup-chip.urgent-chip{background:#fee2e2;color:#991b1b}
+.mockup-chip.type-chip{background:#fff3e0;color:#7a4a0a}
+.mockup-card-title{font-family:'Fraunces',serif;font-size:.88rem;font-weight:600;color:#3d2b1a;margin-bottom:.25rem}
+.mockup-card-body{font-size:.75rem;color:#4a3726;margin-bottom:.35rem;line-height:1.4}
+.mockup-card-meta{font-size:.68rem;color:#7a6a57;margin-bottom:.5rem}
+.mockup-btn{background:#3a6b4a;color:#fff;border:none;border-radius:6px;padding:.28rem .7rem;font-size:.72rem;font-weight:600;cursor:default}
+
+/* ── ABOUT MODAL ── */
+.about-overlay{position:fixed;inset:0;background:rgba(30,20,10,.55);z-index:500;display:flex;align-items:center;justify-content:center;padding:1rem;backdrop-filter:blur(4px);animation:fadeIn .18s ease}
+.about-box{background:var(--cream);border-radius:20px;padding:2rem;width:min(480px,100%);box-shadow:0 20px 60px rgba(0,0,0,.28);animation:slideUp .22s cubic-bezier(.34,1.3,.64,1);position:relative;max-height:90vh;overflow-y:auto}
+.about-box h2{font-family:'Fraunces',serif;font-size:1.5rem;font-weight:700;margin:0 0 .3rem;color:var(--bark)}
+.about-box p{font-size:.9rem;color:var(--muted);line-height:1.65;margin:.6rem 0}
+.about-box a{color:var(--moss);text-decoration:none;font-weight:600}
+.about-box a:hover{text-decoration:underline}
+.about-close{position:absolute;top:.75rem;right:.75rem;background:none;border:none;cursor:pointer;font-size:1.2rem;color:var(--muted);padding:.2rem .4rem;border-radius:6px}
+.about-divider{height:1px;background:var(--border);margin:1rem 0}
+/* About button in landing footer */
+.landing-footer{background:var(--bark);padding:1.2rem 2rem;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:.8rem}
+.landing-footer-logo{font-family:'Fraunces',serif;font-size:1rem;font-weight:700;color:var(--sand);opacity:.7}
+.landing-footer-links{display:flex;gap:1.2rem}
+.landing-footer-links button{background:none;border:none;color:#b8a98e;font-size:.82rem;cursor:pointer;font:inherit;padding:0;transition:color .15s}
+.landing-footer-links button:hover{color:var(--sand)}
+/* About link in app */
+.about-app-link{background:none;border:none;color:var(--muted);font-size:.75rem;cursor:pointer;font:inherit;padding:.3rem .5rem;border-radius:6px;transition:color .15s}
+.about-app-link:hover{color:var(--bark)}
+
+/* ── LEGAL MODALS ── */
+.legal-overlay{position:fixed;inset:0;background:rgba(30,20,10,.6);z-index:600;display:flex;align-items:center;justify-content:center;padding:1rem;backdrop-filter:blur(4px);animation:fadeIn .18s ease}
+.legal-box{background:var(--cream);border-radius:20px;padding:2rem 2rem 1.5rem;width:min(620px,100%);max-height:85vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,.3);animation:slideUp .22s cubic-bezier(.34,1.3,.64,1);position:relative}
+.legal-box h2{font-family:'Fraunces',serif;font-size:1.4rem;font-weight:700;margin:0 0 .2rem;color:var(--bark)}
+.legal-box .legal-date{font-size:.8rem;color:var(--muted);margin:0 0 1.2rem}
+.legal-box h3{font-family:'Fraunces',serif;font-size:1rem;font-weight:600;margin:1.2rem 0 .4rem;color:var(--bark2)}
+.legal-box p,.legal-box li{font-size:.88rem;color:#4a3726;line-height:1.7;margin:.3rem 0}
+.legal-box ul{padding-left:1.2rem;margin:.3rem 0}
+.legal-close{position:absolute;top:.75rem;right:.75rem;background:none;border:none;cursor:pointer;font-size:1.2rem;color:var(--muted);padding:.2rem .4rem;border-radius:6px}
+.legal-close:hover{color:var(--bark)}
+.legal-divider{height:1px;background:var(--border);margin:1rem 0}
 </style>
 </head>
 <body>
@@ -387,7 +471,7 @@ button{font:inherit;cursor:pointer;border:none;border-radius:10px;font-weight:60
       <span>▦</span><span class="tab-label">Map</span>
     </button>
   </div>
-  <div class="sidebar-bottom">
+  <div class="sidebar-bottom"><button class="about-app-link" onclick="document.getElementById('aboutOverlay').hidden=false" title="About Helpy">ⓘ</button>
     <div class="sidebar-divider"></div>
     <button id="profileTab" class="tab" type="button" title="Profile">
       <span>○</span><span class="tab-label">Profile</span>
@@ -532,6 +616,13 @@ button{font:inherit;cursor:pointer;border:none;border-radius:10px;font-weight:60
     </div>
   </header>
 
+  <div style="position:absolute;left:-9999px;top:-9999px;width:1px;height:1px;overflow:hidden" aria-hidden="true">
+    <h1>Helpy - Free Neighborhood Help Network</h1>
+    <p>Helpy is a free community platform where neighbors help neighbors. Post requests for transportation, groceries, childcare, tech help, manual work, medical assistance, and more. Volunteers in your area see your request and offer to help.</p>
+    <p>Students can earn and track volunteer hours through Helpy. After helping a neighbor, log your hours directly on the platform. The person you helped verifies the hours, and they're saved permanently to your profile — perfect for high school and college community service requirements.</p>
+    <p>Features include: real-time help requests, map view of nearby requests, direct messaging between poster and volunteer, star ratings, volunteer hour tracking, and more.</p>
+    <p>Free to use. No ads. Built for communities.</p>
+  </div>
   <div class="landing-hero">
     <h1>Help your <span>neighbors</span>.<br>Get help fast.</h1>
     <p>Helpy connects people who need small acts of help with neighbors who can step up — rides, groceries, moving furniture, and more.</p>
@@ -563,28 +654,44 @@ button{font:inherit;cursor:pointer;border:none;border-radius:10px;font-weight:60
   </div>
 
   <div class="landing-posts">
-    <h2>What neighbors are asking for</h2>
-    <div class="landing-posts-grid">
-      <div class="sample-card urgent">
-        <div>
-          <span class="sample-card-type">Transportation</span>
-          <span class="sample-card-urgent-badge">● URGENT</span>
+    <h2>See what's happening in your neighborhood</h2>
+    <div class="landing-mockup">
+      <div class="mockup-browser">
+        <div class="mockup-bar">
+          <span class="mockup-dot" style="background:#ff5f57"></span>
+          <span class="mockup-dot" style="background:#febc2e"></span>
+          <span class="mockup-dot" style="background:#28c840"></span>
+          <span class="mockup-url">helpy-helpy.vercel.app</span>
         </div>
-        <h4>Need a ride to the pharmacy</h4>
-        <p>My car broke down and I need to pick up medication today. Would really appreciate the help!</p>
-        <div class="sample-card-meta">Maria · 0.4 mi away · just now</div>
-      </div>
-      <div class="sample-card">
-        <div><span class="sample-card-type">Groceries</span></div>
-        <h4>Grocery run — I'll pay + tip</h4>
-        <p>Recovering from surgery, need someone to grab a few things from Whole Foods this afternoon.</p>
-        <div class="sample-card-meta">Tom · 1.2 mi away · 20m ago</div>
-      </div>
-      <div class="sample-card">
-        <div><span class="sample-card-type" style="background:#f0fdf4;color:#166534">Manual Work</span></div>
-        <h4>Help moving a couch</h4>
-        <p>Just need an extra pair of hands for 20 minutes to move a couch up one flight of stairs.</p>
-        <div class="sample-card-meta">Alex · 0.8 mi away · 1h ago</div>
+        <div class="mockup-body">
+          <div class="mockup-sidebar">
+            <div class="mockup-tab active-tab">✦<br><small>Post</small></div>
+            <div class="mockup-tab">↗<br><small>Help</small></div>
+            <div class="mockup-tab">▦<br><small>Map</small></div>
+            <div class="mockup-tab" style="margin-top:auto">○<br><small>Profile</small></div>
+          </div>
+          <div class="mockup-content">
+            <div class="mockup-card urgent-card">
+              <div class="mockup-card-top">
+                <span class="mockup-chip urgent-chip">● URGENT</span>
+                <span class="mockup-chip type-chip">Transportation</span>
+              </div>
+              <div class="mockup-card-title">Need a ride to the pharmacy</div>
+              <div class="mockup-card-body">My car broke down and I need to pick up medication today.</div>
+              <div class="mockup-card-meta">Maria · 0.4 mi · just now</div>
+              <button class="mockup-btn">I Can Help</button>
+            </div>
+            <div class="mockup-card">
+              <div class="mockup-card-top">
+                <span class="mockup-chip type-chip" style="background:#e8f4fd;color:#4a7fa5">Groceries</span>
+              </div>
+              <div class="mockup-card-title">Grocery run — I'll pay + tip</div>
+              <div class="mockup-card-body">Recovering from surgery, need someone to grab a few things.</div>
+              <div class="mockup-card-meta">Tom · 1.2 mi · 20m ago</div>
+              <button class="mockup-btn">I Can Help</button>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   </div>
@@ -612,6 +719,16 @@ button{font:inherit;cursor:pointer;border:none;border-radius:10px;font-weight:60
     <h2>Ready to help or be helped?</h2>
     <p>Join your neighborhood network — it's free and takes 30 seconds.</p>
     <button class="btn-hero-primary" id="landingCtaBtn" style="font-size:1.05rem;padding:.9rem 2.4rem">Create a free account</button>
+  </div>
+  <div class="landing-footer">
+    <div class="landing-footer-logo">✦ Helpy.</div>
+    <div class="landing-footer-links">
+      <button onclick="document.getElementById('aboutOverlay').hidden=false">About</button>
+      <button onclick="document.getElementById('aboutOverlay').hidden=false">Contact</button>
+      <button onclick="document.getElementById('termsOverlay').hidden=false">Terms</button>
+      <button onclick="document.getElementById('cookieOverlay').hidden=false">Cookies</button>
+      <button onclick="document.getElementById('feedbackOverlay').hidden=false">Feedback</button>
+    </div>
   </div>
 </div>
 
@@ -1349,6 +1466,9 @@ function renderProfile(user){
     const totalHours=entries.reduce((s,e)=>s+e.hours,0);
     const verifiedHours=entries.filter(e=>e.verified).reduce((s,e)=>s+e.hours,0);
     const pendingHours=totalHours-verifiedHours;
+    // Store entries for PDF download
+    window._hoursEntries = entries;
+    window._hoursUser = user.displayName || user.email || 'Volunteer';
     hoursSection.innerHTML=`
       <div class="hours-summary">
         <div class="hours-summary-icon">🎓</div>
@@ -1369,7 +1489,8 @@ function renderProfile(user){
             <span class="hours-log-item-badge ${e.verified?"verified":"pending"}">${e.verified?"✓ Verified":"⏳ Pending"}</span>
           </div>
         </li>`).join("")}
-      </ul>`;
+      </ul>
+      <button onclick="downloadHoursPDF()" style="margin-top:1rem;background:var(--moss);color:#fff;border:none;border-radius:10px;padding:.6rem 1.3rem;font:inherit;font-size:.88rem;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:.4rem;">⬇ Download Hours Certificate (PDF)</button>\`;
   },{onlyOnce:true});
 
   if(myPosts.length){
@@ -1494,20 +1615,29 @@ function hideLanding(){
   if(lp){ lp.style.opacity='0'; lp.style.transition='opacity .3s'; setTimeout(()=>lp.style.display='none',300); }
 }
 function initLanding(){
+  // If user already dismissed landing before, skip it
+  if(localStorage.getItem('nhn_landing_seen')==='1'){
+    const lp=document.getElementById('landingPage');
+    if(lp)lp.style.display='none';
+    return;
+  }
   // Sign in button
   document.getElementById('landingSignIn').onclick=()=>{
+    localStorage.setItem('nhn_landing_seen','1');
     hideLanding();
     setTimeout(()=>{ el.authOverlay.hidden=false; switchAuthMode('signin'); },300);
   };
   // Create account buttons
   ['landingSignUp','landingGetStarted','landingCtaBtn'].forEach(id=>{
     document.getElementById(id).onclick=()=>{
+      localStorage.setItem('nhn_landing_seen','1');
       hideLanding();
       setTimeout(()=>{ el.authOverlay.hidden=false; switchAuthMode('signup'); },300);
     };
   });
   // Browse as guest
   document.getElementById('landingBrowse').onclick=()=>{
+    localStorage.setItem('nhn_landing_seen','1');
     hideLanding();
   };
 }
@@ -1537,6 +1667,154 @@ function clearHelpBadge(data){
     lastSeenPostCount = Object.values(latestPosts).filter(p=>!p.expiresAt||p.expiresAt>now).length;
     localStorage.setItem('nhn_seen_count', String(lastSeenPostCount));
   }
+}
+
+
+// ── HOURS PDF DOWNLOAD ────────────────────────────────────────
+function downloadHoursPDF(){
+  const entries = window._hoursEntries || [];
+  const userName = window._hoursUser || 'Volunteer';
+  const totalH = entries.reduce((s,e)=>s+e.hours,0);
+  const verifiedH = entries.filter(e=>e.verified).reduce((s,e)=>s+e.hours,0);
+  const rows = entries.sort((a,b)=>b.loggedAt-a.loggedAt).map(e=>`
+    <tr>
+      <td style="padding:.5rem .8rem;border-bottom:1px solid #eee">${e.postTitle||'Helped a neighbor'}</td>
+      <td style="padding:.5rem .8rem;border-bottom:1px solid #eee">${e.posterName||'—'}</td>
+      <td style="padding:.5rem .8rem;border-bottom:1px solid #eee">${new Date(e.loggedAt).toLocaleDateString()}</td>
+      <td style="padding:.5rem .8rem;border-bottom:1px solid #eee;text-align:center">${e.hours}h</td>
+      <td style="padding:.5rem .8rem;border-bottom:1px solid #eee;text-align:center;color:${e.verified?'#1c5430':'#7a4a0a'}">${e.verified?'✓ Verified':'⏳ Pending'}</td>
+    </tr>`).join('');
+  const html=`<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Helpy Volunteer Hours — ${userName}</title>
+  <style>body{font-family:Georgia,serif;max-width:700px;margin:2rem auto;color:#3d2b1a;padding:2rem}
+  h1{font-size:2rem;margin:0 0 .2rem}h2{font-size:1.1rem;font-weight:normal;color:#7a6a57;margin:0 0 1.5rem}
+  .summary{background:#e8f5ec;border-radius:12px;padding:1rem 1.5rem;margin-bottom:1.5rem;display:flex;gap:2rem}
+  .stat{text-align:center}.stat .num{font-size:2rem;font-weight:700;color:#1c5430}.stat .lbl{font-size:.8rem;color:#7a6a57}
+  table{width:100%;border-collapse:collapse;font-size:.9rem}
+  th{background:#3d2b1a;color:#fff;padding:.5rem .8rem;text-align:left}
+  .footer{margin-top:2rem;font-size:.8rem;color:#7a6a57;border-top:1px solid #ddd;padding-top:1rem}
+  
+/* ── LEGAL MODALS ── */
+.legal-overlay{position:fixed;inset:0;background:rgba(30,20,10,.6);z-index:600;display:flex;align-items:center;justify-content:center;padding:1rem;backdrop-filter:blur(4px);animation:fadeIn .18s ease}
+.legal-box{background:var(--cream);border-radius:20px;padding:2rem 2rem 1.5rem;width:min(620px,100%);max-height:85vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,.3);animation:slideUp .22s cubic-bezier(.34,1.3,.64,1);position:relative}
+.legal-box h2{font-family:'Fraunces',serif;font-size:1.4rem;font-weight:700;margin:0 0 .2rem;color:var(--bark)}
+.legal-box .legal-date{font-size:.8rem;color:var(--muted);margin:0 0 1.2rem}
+.legal-box h3{font-family:'Fraunces',serif;font-size:1rem;font-weight:600;margin:1.2rem 0 .4rem;color:var(--bark2)}
+.legal-box p,.legal-box li{font-size:.88rem;color:#4a3726;line-height:1.7;margin:.3rem 0}
+.legal-box ul{padding-left:1.2rem;margin:.3rem 0}
+.legal-close{position:absolute;top:.75rem;right:.75rem;background:none;border:none;cursor:pointer;font-size:1.2rem;color:var(--muted);padding:.2rem .4rem;border-radius:6px}
+.legal-close:hover{color:var(--bark)}
+.legal-divider{height:1px;background:var(--border);margin:1rem 0}
+</style></head><body>
+  <h1>✦ Helpy Volunteer Hours</h1>
+  <h2>${userName} · Generated ${new Date().toLocaleDateString()}</h2>
+  <div class="summary">
+    <div class="stat"><div class="num">${totalH}h</div><div class="lbl">Total Hours</div></div>
+    <div class="stat"><div class="num">${verifiedH}h</div><div class="lbl">Verified</div></div>
+    <div class="stat"><div class="num">${entries.length}</div><div class="lbl">Tasks</div></div>
+  </div>
+  <table><thead><tr><th>Task</th><th>Helped</th><th>Date</th><th>Hours</th><th>Status</th></tr></thead>
+  <tbody>${rows}</tbody></table>
+  <div class="footer">Generated by Helpy · helpy-helpy.vercel.app · This document shows volunteer hours logged through the Helpy platform.</div>
+  
+<!-- Terms & Conditions -->
+<div id="termsOverlay" class="legal-overlay" hidden>
+  <div class="legal-box">
+    <button class="legal-close" onclick="document.getElementById('termsOverlay').hidden=true">✕</button>
+    <h2>Terms & Conditions</h2>
+    <p class="legal-date">Last updated: March 2026</p>
+
+    <h3>1. Acceptance of Terms</h3>
+    <p>By accessing or using Helpy ("the Service"), you agree to be bound by these Terms & Conditions. If you do not agree, please do not use the Service.</p>
+
+    <div class="legal-divider"></div>
+    <h3>2. What Helpy Is</h3>
+    <p>Helpy is a community platform that allows users to post requests for small acts of help and for other users to volunteer to fulfill those requests. Helpy is not a commercial service — it is a free community tool.</p>
+
+    <div class="legal-divider"></div>
+    <h3>3. User Responsibilities</h3>
+    <ul>
+      <li>You must be at least 13 years old to use Helpy.</li>
+      <li>You are responsible for all content you post.</li>
+      <li>You agree not to post false, harmful, offensive, or misleading requests.</li>
+      <li>You agree not to use Helpy for any commercial or illegal purpose.</li>
+      <li>You are solely responsible for any interactions with other users. Helpy does not vet or verify users.</li>
+    </ul>
+
+    <div class="legal-divider"></div>
+    <h3>4. Volunteer Hours</h3>
+    <p>Helpy provides a tool to log and track volunteer hours. We do not guarantee that logged hours will be accepted by any school, institution, or organization. It is the user's responsibility to verify requirements with their institution.</p>
+
+    <div class="legal-divider"></div>
+    <h3>5. Safety</h3>
+    <p>Helpy is not responsible for any harm, injury, or loss that occurs as a result of interactions arranged through the platform. Always use common sense and meet in safe, public places when helping strangers.</p>
+
+    <div class="legal-divider"></div>
+    <h3>6. Intellectual Property</h3>
+    <p>All content on Helpy (excluding user posts) is owned by Helpy. You may not copy, reproduce, or distribute it without permission.</p>
+
+    <div class="legal-divider"></div>
+    <h3>7. Disclaimers</h3>
+    <p>Helpy is provided "as is" without warranties of any kind. We do not guarantee uptime, data retention, or the accuracy of user-submitted content.</p>
+
+    <div class="legal-divider"></div>
+    <h3>8. Changes to Terms</h3>
+    <p>We may update these terms at any time. Continued use of the Service after changes constitutes acceptance of the new terms.</p>
+
+    <div class="legal-divider"></div>
+    <h3>9. Contact</h3>
+    <p>Questions? Email us at <a href="mailto:hello@helpy.app" style="color:var(--moss)">hello@helpy.app</a>.</p>
+  </div>
+</div>
+
+<!-- Cookie Policy -->
+<div id="cookieOverlay" class="legal-overlay" hidden>
+  <div class="legal-box">
+    <button class="legal-close" onclick="document.getElementById('cookieOverlay').hidden=true">✕</button>
+    <h2>Cookie Policy</h2>
+    <p class="legal-date">Last updated: March 2026</p>
+
+    <h3>1. What Are Cookies</h3>
+    <p>Cookies are small text files stored on your device. Helpy uses browser <strong>localStorage</strong> (similar to cookies) to store settings and preferences locally on your device.</p>
+
+    <div class="legal-divider"></div>
+    <h3>2. What We Store Locally</h3>
+    <ul>
+      <li><strong>nhn_client_id</strong> — A random ID to identify guest users so they can manage their own posts.</li>
+      <li><strong>nhn_last_post_at</strong> — Timestamp of your last post, used to enforce rate limiting.</li>
+      <li><strong>nhn_seen_count</strong> — Number of posts seen, used for the notification badge.</li>
+      <li><strong>nhn_landing_seen</strong> — Whether you've already seen the landing page.</li>
+      <li><strong>msg_read_[id]</strong> — Timestamps for marking messages as read.</li>
+    </ul>
+
+    <div class="legal-divider"></div>
+    <h3>3. Third-Party Services</h3>
+    <p>Helpy uses the following third-party services which may set their own cookies or store data:</p>
+    <ul>
+      <li><strong>Firebase (Google)</strong> — For authentication and real-time database. See <a href="https://policies.google.com/privacy" target="_blank" style="color:var(--moss)">Google's Privacy Policy</a>.</li>
+      <li><strong>Google Fonts</strong> — For typography. May log requests to Google servers.</li>
+      <li><strong>OpenStreetMap / Nominatim</strong> — For map tiles and geocoding.</li>
+      <li><strong>Leaflet.js</strong> — Open-source mapping library, no external tracking.</li>
+    </ul>
+
+    <div class="legal-divider"></div>
+    <h3>4. No Advertising Cookies</h3>
+    <p>Helpy does not use advertising cookies, tracking pixels, or sell any user data to third parties.</p>
+
+    <div class="legal-divider"></div>
+    <h3>5. Managing Storage</h3>
+    <p>You can clear all locally stored data at any time by clearing your browser's localStorage (Settings → Privacy → Clear browsing data).</p>
+
+    <div class="legal-divider"></div>
+    <h3>6. Contact</h3>
+    <p>Questions? Email us at <a href="mailto:hello@helpy.app" style="color:var(--moss)">hello@helpy.app</a>.</p>
+  </div>
+</div>
+
+</body></html>`;
+  const win=window.open('','_blank');
+  win.document.write(html);
+  win.document.close();
+  setTimeout(()=>win.print(),500);
 }
 
 // ── INIT ──────────────────────────────────────────────────────
@@ -1727,5 +2005,116 @@ function init(){
 }
 init();
 </script>
+
+<!-- About / Contact Modal -->
+<div id="aboutOverlay" class="about-overlay" hidden>
+  <div class="about-box">
+    <button class="about-close" onclick="document.getElementById('aboutOverlay').hidden=true">✕</button>
+    <h2>✦ About Helpy</h2>
+    <p>Helpy is a neighborhood help network built at <strong>FCHacks 2026</strong>. It connects people who need small acts of help with neighbors who are willing to step up.</p>
+    <p>Whether it's a ride to the pharmacy, help moving furniture, or someone to grab groceries — Helpy makes it easy to ask and easy to help.</p>
+    <div class="about-divider"></div>
+    <p><strong>🎓 Volunteer Hours</strong><br>Students can log volunteer hours directly through Helpy after helping a neighbor. Hours are verified by the person you helped and saved to your profile.</p>
+    <div class="about-divider"></div>
+    <p><strong>📬 Contact</strong><br>Have feedback or questions? Use the <strong>↗ Feedback</strong> button in the app, or reach us at <a href="/cdn-cgi/l/email-protection#c2aaa7aeaead82aaa7aeb2bbeca3b2b2"><span class="__cf_email__" data-cfemail="2b434e4747446b434e475b52054a5b5b">[email&#160;protected]</span></a>.</p>
+    <div class="about-divider"></div>
+    <p style="font-size:.8rem;color:var(--muted)">Built with ♥ using Firebase, Leaflet, and OpenStreetMap. Free to use.</p>
+  </div>
+</div>
+
+<!-- Terms & Conditions -->
+<div id="termsOverlay" class="legal-overlay" hidden>
+  <div class="legal-box">
+    <button class="legal-close" onclick="document.getElementById('termsOverlay').hidden=true">✕</button>
+    <h2>Terms & Conditions</h2>
+    <p class="legal-date">Last updated: March 2026</p>
+
+    <h3>1. Acceptance of Terms</h3>
+    <p>By accessing or using Helpy ("the Service"), you agree to be bound by these Terms & Conditions. If you do not agree, please do not use the Service.</p>
+
+    <div class="legal-divider"></div>
+    <h3>2. What Helpy Is</h3>
+    <p>Helpy is a community platform that allows users to post requests for small acts of help and for other users to volunteer to fulfill those requests. Helpy is not a commercial service — it is a free community tool.</p>
+
+    <div class="legal-divider"></div>
+    <h3>3. User Responsibilities</h3>
+    <ul>
+      <li>You must be at least 13 years old to use Helpy.</li>
+      <li>You are responsible for all content you post.</li>
+      <li>You agree not to post false, harmful, offensive, or misleading requests.</li>
+      <li>You agree not to use Helpy for any commercial or illegal purpose.</li>
+      <li>You are solely responsible for any interactions with other users. Helpy does not vet or verify users.</li>
+    </ul>
+
+    <div class="legal-divider"></div>
+    <h3>4. Volunteer Hours</h3>
+    <p>Helpy provides a tool to log and track volunteer hours. We do not guarantee that logged hours will be accepted by any school, institution, or organization. It is the user's responsibility to verify requirements with their institution.</p>
+
+    <div class="legal-divider"></div>
+    <h3>5. Safety</h3>
+    <p>Helpy is not responsible for any harm, injury, or loss that occurs as a result of interactions arranged through the platform. Always use common sense and meet in safe, public places when helping strangers.</p>
+
+    <div class="legal-divider"></div>
+    <h3>6. Intellectual Property</h3>
+    <p>All content on Helpy (excluding user posts) is owned by Helpy. You may not copy, reproduce, or distribute it without permission.</p>
+
+    <div class="legal-divider"></div>
+    <h3>7. Disclaimers</h3>
+    <p>Helpy is provided "as is" without warranties of any kind. We do not guarantee uptime, data retention, or the accuracy of user-submitted content.</p>
+
+    <div class="legal-divider"></div>
+    <h3>8. Changes to Terms</h3>
+    <p>We may update these terms at any time. Continued use of the Service after changes constitutes acceptance of the new terms.</p>
+
+    <div class="legal-divider"></div>
+    <h3>9. Contact</h3>
+    <p>Questions? Email us at <a href="/cdn-cgi/l/email-protection#2c44494040436c4449405c55024d5c5c" style="color:var(--moss)"><span class="__cf_email__" data-cfemail="88e0ede4e4e7c8e0ede4f8f1a6e9f8f8">[email&#160;protected]</span></a>.</p>
+  </div>
+</div>
+
+<!-- Cookie Policy -->
+<div id="cookieOverlay" class="legal-overlay" hidden>
+  <div class="legal-box">
+    <button class="legal-close" onclick="document.getElementById('cookieOverlay').hidden=true">✕</button>
+    <h2>Cookie Policy</h2>
+    <p class="legal-date">Last updated: March 2026</p>
+
+    <h3>1. What Are Cookies</h3>
+    <p>Cookies are small text files stored on your device. Helpy uses browser <strong>localStorage</strong> (similar to cookies) to store settings and preferences locally on your device.</p>
+
+    <div class="legal-divider"></div>
+    <h3>2. What We Store Locally</h3>
+    <ul>
+      <li><strong>nhn_client_id</strong> — A random ID to identify guest users so they can manage their own posts.</li>
+      <li><strong>nhn_last_post_at</strong> — Timestamp of your last post, used to enforce rate limiting.</li>
+      <li><strong>nhn_seen_count</strong> — Number of posts seen, used for the notification badge.</li>
+      <li><strong>nhn_landing_seen</strong> — Whether you've already seen the landing page.</li>
+      <li><strong>msg_read_[id]</strong> — Timestamps for marking messages as read.</li>
+    </ul>
+
+    <div class="legal-divider"></div>
+    <h3>3. Third-Party Services</h3>
+    <p>Helpy uses the following third-party services which may set their own cookies or store data:</p>
+    <ul>
+      <li><strong>Firebase (Google)</strong> — For authentication and real-time database. See <a href="https://policies.google.com/privacy" target="_blank" style="color:var(--moss)">Google's Privacy Policy</a>.</li>
+      <li><strong>Google Fonts</strong> — For typography. May log requests to Google servers.</li>
+      <li><strong>OpenStreetMap / Nominatim</strong> — For map tiles and geocoding.</li>
+      <li><strong>Leaflet.js</strong> — Open-source mapping library, no external tracking.</li>
+    </ul>
+
+    <div class="legal-divider"></div>
+    <h3>4. No Advertising Cookies</h3>
+    <p>Helpy does not use advertising cookies, tracking pixels, or sell any user data to third parties.</p>
+
+    <div class="legal-divider"></div>
+    <h3>5. Managing Storage</h3>
+    <p>You can clear all locally stored data at any time by clearing your browser's localStorage (Settings → Privacy → Clear browsing data).</p>
+
+    <div class="legal-divider"></div>
+    <h3>6. Contact</h3>
+    <p>Questions? Email us at <a href="mailto:hello@helpy.app" style="color:var(--moss)">hello@helpy.app</a>.</p>
+  </div>
+</div>
+
 </body>
 </html>
