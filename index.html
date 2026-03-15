@@ -318,6 +318,44 @@ button{font:inherit;cursor:pointer;border:none;border-radius:10px;font-weight:60
 .msg-add button{background:var(--sky);color:#fff;padding:.42rem .85rem;border-radius:8px;font-size:.84rem;font-weight:600;white-space:nowrap;border:none}
 .msg-add button:hover{background:#3a6f95}
 .msg-lock{font-size:.82rem;color:var(--muted);font-style:italic;margin:.3rem 0}
+
+/* ── VOLUNTEER HOURS ── */
+.hours-section{margin-top:.85rem;padding-top:.85rem;border-top:1px solid var(--border)}
+.hours-log-btn{background:#f0fdf4;color:#166534;padding:.38rem .75rem;font-size:.83rem;border-radius:8px;border:1.5px solid #bbf7d0;font:inherit;font-weight:600;cursor:pointer}
+.hours-log-btn:hover{background:#dcfce7}
+.hours-log-btn.verified{background:var(--ok-bg);color:var(--ok-txt);border-color:var(--ok-txt);cursor:default}
+.hours-verify-btn{background:#fff3e0;color:#7a4a0a;padding:.38rem .75rem;font-size:.83rem;border-radius:8px;border:1.5px solid #fed7aa;font:inherit;font-weight:600;cursor:pointer}
+.hours-verify-btn:hover{background:#ffedd5}
+.hours-input-row{display:flex;gap:.5rem;align-items:center;margin-top:.5rem}
+.hours-input-row input{width:70px;font:inherit;padding:.38rem .6rem;border:1.5px solid var(--border);border-radius:8px;font-size:.88rem;text-align:center}
+.hours-input-row input:focus{outline:none;border-color:var(--moss)}
+.hours-input-row button{background:var(--moss);color:#fff;padding:.38rem .85rem;border-radius:8px;font-size:.83rem;font-weight:600;border:none;cursor:pointer}
+.hours-input-row button:hover{background:var(--moss2)}
+.hours-status{font-size:.82rem;font-weight:600;display:flex;align-items:center;gap:.35rem}
+.hours-status.pending{color:var(--gold)}
+.hours-status.verified{color:var(--ok-txt)}
+
+/* ── PROFILE HOURS SUMMARY ── */
+.hours-summary{background:linear-gradient(135deg,var(--moss) 0%,var(--moss2) 100%);border-radius:14px;padding:1.2rem 1.5rem;margin-bottom:1.2rem;color:#fff;display:flex;align-items:center;gap:1.2rem}
+.hours-summary-icon{font-size:2rem}
+.hours-summary-info h3{font-family:'Fraunces',serif;font-size:1.5rem;font-weight:700;margin:0;color:#fff}
+.hours-summary-info p{margin:0;font-size:.85rem;opacity:.85}
+.hours-log-list{list-style:none;margin:.6rem 0 0;padding:0;display:grid;gap:.5rem}
+.hours-log-item{background:var(--sand);border-radius:10px;padding:.6rem .9rem;display:flex;align-items:center;justify-content:space-between;gap:.5rem;flex-wrap:wrap}
+.hours-log-item-title{font-size:.88rem;font-weight:600;color:var(--bark)}
+.hours-log-item-meta{font-size:.78rem;color:var(--muted)}
+.hours-log-item-badge{font-size:.78rem;font-weight:700;padding:.15rem .5rem;border-radius:999px}
+.hours-log-item-badge.verified{background:var(--ok-bg);color:var(--ok-txt)}
+.hours-log-item-badge.pending{background:#fff3e0;color:#7a4a0a}
+
+/* ── LANDING HOURS SECTION ── */
+.landing-hours{background:linear-gradient(135deg,#1a3d2a 0%,var(--moss) 100%);padding:4rem 2rem;color:#fff}
+.landing-hours h2{font-family:'Fraunces',serif;font-size:1.8rem;font-weight:700;text-align:center;color:#fff;margin:0 0 .6rem}
+.landing-hours p{text-align:center;color:rgba(255,255,255,.8);margin:0 0 2.5rem;font-size:1rem}
+.landing-hours-cards{display:flex;gap:1.2rem;justify-content:center;flex-wrap:wrap;max-width:760px;margin:0 auto}
+.landing-hours-card{flex:1;min-width:180px;max-width:220px;background:rgba(255,255,255,.12);border-radius:14px;padding:1.4rem 1rem;text-align:center;border:1px solid rgba(255,255,255,.2)}
+.landing-hours-card .stat{font-family:'Fraunces',serif;font-size:2.2rem;font-weight:700;color:#fff}
+.landing-hours-card .stat-label{font-size:.85rem;color:rgba(255,255,255,.75);margin-top:.2rem}
 </style>
 </head>
 <body>
@@ -547,6 +585,25 @@ button{font:inherit;cursor:pointer;border:none;border-radius:10px;font-weight:60
         <h4>Help moving a couch</h4>
         <p>Just need an extra pair of hands for 20 minutes to move a couch up one flight of stairs.</p>
         <div class="sample-card-meta">Alex · 0.8 mi away · 1h ago</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="landing-hours">
+    <h2>Perfect for student volunteer hours 🎓</h2>
+    <p>Help a neighbor, log your hours, get them verified — all in one place.</p>
+    <div class="landing-hours-cards">
+      <div class="landing-hours-card">
+        <div class="stat">✓</div>
+        <div class="stat-label">Log hours after helping</div>
+      </div>
+      <div class="landing-hours-card">
+        <div class="stat">✦</div>
+        <div class="stat-label">Poster verifies your time</div>
+      </div>
+      <div class="landing-hours-card">
+        <div class="stat">○</div>
+        <div class="stat-label">Track total hours in your profile</div>
       </div>
     </div>
   </div>
@@ -1003,6 +1060,64 @@ function makeCard(id,p){
           rateSec.append(lbl,starsDiv);
         }
         contentDiv.appendChild(rateSec);
+
+        // ── VOLUNTEER HOURS SECTION ──
+        // Volunteer logs hours; poster verifies
+        const hoursSec=document.createElement("div");hoursSec.className="hours-section";
+        const hoursEntry=p.hoursEntry||null; // {hours, loggedBy, loggedAt, verified, verifiedAt}
+        const isVolunteer=currentUser&&p.volunteerName&&(currentUser.displayName||(currentUser.email||"").split("@")[0]).slice(0,30)===p.volunteerName.slice(0,30);
+
+        if(!hoursEntry){
+          // Volunteer can log hours
+          if(isVolunteer){
+            const logBtn=document.createElement("button");logBtn.className="hours-log-btn";logBtn.type="button";logBtn.textContent="⏱ Log volunteer hours";
+            const inputRow=document.createElement("div");inputRow.className="hours-input-row";inputRow.hidden=true;
+            const hInput=document.createElement("input");hInput.type="number";hInput.min=0.25;hInput.max=24;hInput.step=0.25;hInput.value=1;hInput.placeholder="hrs";
+            const submitH=document.createElement("button");submitH.type="button";submitH.textContent="Submit";
+            submitH.onclick=async()=>{
+              const hrs=parseFloat(hInput.value);
+              if(!hrs||hrs<=0||hrs>24)return toast("Enter a valid number of hours (max 24).","err");
+              try{
+                await update(ref(db,`posts/${id}`),{hoursEntry:{hours:hrs,loggedBy:currentUser.uid,loggedByName:(currentUser.displayName||(currentUser.email||"").split("@")[0]),loggedAt:Date.now(),verified:false}});
+                // Save to user's hours log
+                await push(ref(db,`users/${currentUser.uid}/hoursLog`),{postId:id,postTitle:p.title,hours:hrs,loggedAt:Date.now(),verified:false,posterName:p.posterName||""});
+                toast("✓ Hours logged! Waiting for poster to verify.");
+              }catch{toast("Couldn't log hours.","err");}
+            };
+            inputRow.append(hInput,submitH);
+            logBtn.onclick=()=>{inputRow.hidden=!inputRow.hidden;};
+            hoursSec.append(logBtn,inputRow);
+          }
+        } else if(!hoursEntry.verified){
+          // Show pending status
+          const status=document.createElement("div");status.className="hours-status pending";
+          status.innerHTML=`⏳ ${esc(hoursEntry.loggedByName||"Volunteer")} logged <strong>${hoursEntry.hours}h</strong> — awaiting verification`;
+          hoursSec.appendChild(status);
+          // Poster can verify
+          if(isOwner){
+            const verifyBtn=document.createElement("button");verifyBtn.className="hours-verify-btn";verifyBtn.type="button";verifyBtn.textContent="✓ Verify hours";
+            verifyBtn.onclick=async()=>{
+              try{
+                await update(ref(db,`posts/${id}/hoursEntry`),{verified:true,verifiedAt:Date.now()});
+                // Update volunteer's hours log
+                const logSnap=await new Promise(res=>onValue(ref(db,`users/${hoursEntry.loggedBy}/hoursLog`),res,{onlyOnce:true}));
+                const logData=logSnap.val();
+                if(logData){
+                  const entry=Object.entries(logData).find(([,v])=>v.postId===id);
+                  if(entry)await update(ref(db,`users/${hoursEntry.loggedBy}/hoursLog/${entry[0]}`),{verified:true,verifiedAt:Date.now()});
+                }
+                toast("✓ Hours verified!");
+              }catch{toast("Couldn't verify.","err");}
+            };
+            hoursSec.appendChild(verifyBtn);
+          }
+        } else {
+          // Verified!
+          const status=document.createElement("div");status.className="hours-status verified";
+          status.innerHTML=`✓ <strong>${hoursEntry.hours}h</strong> verified by ${esc(p.posterName||"poster")}`;
+          hoursSec.appendChild(status);
+        }
+        contentDiv.appendChild(hoursSec);
       }
     }
     // Share button
@@ -1189,6 +1304,7 @@ function renderProfile(user){
         <button id="profileNameSave">Save</button>
       </div>
     </div>
+    <div id="hoursSection" style="margin-bottom:1.5rem"></div>
     <p class="profile-section-title" style="margin-top:1.5rem">Your Posts</p>
     ${myPosts.length===0?`<div class="empty-state"><p>— Nothing posted yet</p></div>`:""}
     <ul class="list" id="profilePostList"></ul>
@@ -1219,6 +1335,42 @@ function renderProfile(user){
     await saveDisplayName(user.uid,newName);
     renderProfile(auth.currentUser);
   };
+
+  // Load volunteer hours log
+  onValue(ref(db,`users/${user.uid}/hoursLog`),snap=>{
+    const hoursSection=document.getElementById("hoursSection");
+    if(!hoursSection)return;
+    const log=snap.val();
+    if(!log){
+      hoursSection.innerHTML=`<div class="hours-summary"><div class="hours-summary-icon">⏱</div><div class="hours-summary-info"><h3>0h</h3><p>No volunteer hours yet — help a neighbor to get started!</p></div></div>`;
+      return;
+    }
+    const entries=Object.values(log);
+    const totalHours=entries.reduce((s,e)=>s+e.hours,0);
+    const verifiedHours=entries.filter(e=>e.verified).reduce((s,e)=>s+e.hours,0);
+    const pendingHours=totalHours-verifiedHours;
+    hoursSection.innerHTML=`
+      <div class="hours-summary">
+        <div class="hours-summary-icon">🎓</div>
+        <div class="hours-summary-info">
+          <h3>${verifiedHours}h verified</h3>
+          <p>${totalHours}h total · ${pendingHours>0?`${pendingHours}h pending verification`:"all verified"}</p>
+        </div>
+      </div>
+      <p class="profile-section-title">Volunteer Hours Log</p>
+      <ul class="hours-log-list">${entries.sort((a,b)=>b.loggedAt-a.loggedAt).map(e=>`
+        <li class="hours-log-item">
+          <div>
+            <div class="hours-log-item-title">${esc(e.postTitle||"Helped a neighbor")}</div>
+            <div class="hours-log-item-meta">${e.posterName?`for ${esc(e.posterName)} · `:""}${timeAgo(e.loggedAt)}</div>
+          </div>
+          <div style="display:flex;align-items:center;gap:.5rem">
+            <strong style="font-size:.95rem">${e.hours}h</strong>
+            <span class="hours-log-item-badge ${e.verified?"verified":"pending"}">${e.verified?"✓ Verified":"⏳ Pending"}</span>
+          </div>
+        </li>`).join("")}
+      </ul>`;
+  },{onlyOnce:true});
 
   if(myPosts.length){
     const ul=document.getElementById("profilePostList");
