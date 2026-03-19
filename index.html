@@ -512,6 +512,25 @@ button{font:inherit;cursor:pointer;border:none;border-radius:10px;font-weight:60
 .rep-details{flex:1}
 .rep-details p{margin:0;font-size:.82rem;color:var(--muted)}
 .rep-breakdown{display:flex;gap:.5rem;flex-wrap:wrap;margin-top:.4rem}
+
+/* ── MAP IMPROVEMENTS ── */
+.map-controls{display:flex;gap:.5rem;margin-bottom:.75rem;flex-wrap:wrap;align-items:center}
+.map-filter-select{font:inherit;font-size:.85rem;padding:.38rem .65rem;border:1.5px solid var(--border);border-radius:8px;background:#fff;color:var(--bark);cursor:pointer}
+[data-theme="dark"] .map-filter-select{background:#2a211a;color:var(--bark);border-color:var(--border)}
+.btn-map-loc{background:var(--moss);color:#fff;border:none;border-radius:8px;padding:.38rem .85rem;font:inherit;font-size:.84rem;font-weight:600;cursor:pointer;white-space:nowrap;transition:background .15s;margin-left:auto}
+.btn-map-loc:hover{background:var(--moss2)}
+.btn-map-loc.got{background:#2d7d8a}
+
+/* Map card drawer — slides up when pin clicked */
+.map-card-drawer{background:var(--cream);border:1.5px solid var(--border);border-radius:14px;padding:1rem 1.2rem;margin-top:.75rem;position:relative;animation:fadeUp .2s ease}
+.map-drawer-close{position:absolute;top:.6rem;right:.75rem;background:none;border:none;cursor:pointer;font-size:1rem;color:var(--muted);padding:.2rem}
+.map-drawer-title{font-family:'Fraunces',serif;font-size:1.05rem;font-weight:600;color:var(--bark);margin:0 0 .3rem}
+.map-drawer-meta{font-size:.82rem;color:var(--muted);margin-bottom:.6rem;display:flex;gap:.5rem;flex-wrap:wrap;align-items:center}
+.map-drawer-body{font-size:.88rem;color:#4a3726;line-height:1.55;margin-bottom:.7rem}
+.map-drawer-actions{display:flex;gap:.5rem;flex-wrap:wrap}
+
+/* User location dot */
+.my-location-dot{width:16px;height:16px;border-radius:50%;background:#3b82f6;border:3px solid #fff;box-shadow:0 0 0 3px rgba(59,130,246,.3),0 1px 5px rgba(0,0,0,.3)}
 </style>
 </head>
 <body>
@@ -681,9 +700,25 @@ button{font:inherit;cursor:pointer;border:none;border-radius:10px;font-weight:60
   </section>
 
   <section id="mapPanel" class="panel" hidden>
-    <p class="panel-title" style="margin-bottom:.9rem">▦ Requests Near You</p>
+    <p class="panel-title" style="margin-bottom:.75rem">▦ Requests Near You</p>
+    <div class="map-controls">
+      <select id="mapFilterType" class="map-filter-select">
+        <option value="All">All types</option>
+        <option>Transportation</option><option>Medical</option><option>Education</option>
+        <option>Manual Work</option><option>Groceries</option><option>Childcare</option>
+        <option>Tech Help</option><option>Other</option>
+      </select>
+      <select id="mapFilterStatus" class="map-filter-select">
+        <option value="all">All status</option>
+        <option value="open">Needs help</option>
+        <option value="urgent">Urgent only</option>
+        <option value="done">Filled</option>
+      </select>
+      <button id="mapLocBtn" class="btn-map-loc">📌 My Location</button>
+    </div>
     <div id="map"></div>
-    <p class="map-note">● Red = Urgent &nbsp;·&nbsp; ◎ Yellow = Open &nbsp;·&nbsp; ✓ Green = Filled &nbsp;·&nbsp; Share your location to see nearby posts on the map.</p>
+    <div id="mapCardDrawer" class="map-card-drawer" hidden></div>
+    <p class="map-note">● Red = Urgent &nbsp;·&nbsp; ◎ Yellow = Open &nbsp;·&nbsp; ✓ Green = Filled</p>
   </section>
   <section id="profilePanel" class="panel" hidden>
     <div id="profileContent"></div>
@@ -1053,12 +1088,40 @@ async function geocode(address){
 }
 
 // ── MAP ───────────────────────────────────────────────────────
+let mapFilterType='All', mapFilterStatus='all', myLocMarker=null;
+
 function initMap(){
   if(leafMap){leafMap.invalidateSize();updateMap(latestPosts);return;}
   const center=(userLat&&userLng)?[userLat,userLng]:[39.5,-98.35];
   const zoom=(userLat&&userLng)?13:3;
   leafMap=L.map("map").setView(center,zoom);
   L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",{attribution:"© OpenStreetMap contributors"}).addTo(leafMap);
+
+  // Wire up map filters
+  const mft=document.getElementById('mapFilterType');
+  const mfs=document.getElementById('mapFilterStatus');
+  if(mft) mft.onchange=e=>{mapFilterType=e.target.value;updateMap(latestPosts);};
+  if(mfs) mfs.onchange=e=>{mapFilterStatus=e.target.value;updateMap(latestPosts);};
+
+  // My location button on map
+  const mlb=document.getElementById('mapLocBtn');
+  if(mlb) mlb.onclick=()=>{
+    if(!navigator.geolocation)return toast('Geolocation not supported','err');
+    mlb.textContent='📌 Getting…';
+    navigator.geolocation.getCurrentPosition(pos=>{
+      userLat=pos.coords.latitude;userLng=pos.coords.longitude;
+      mlb.textContent='✓ Located';mlb.classList.add('got');
+      leafMap.setView([userLat,userLng],14);
+      // Add blue dot
+      if(myLocMarker)myLocMarker.remove();
+      const icon=L.divIcon({className:'',html:'<div class="my-location-dot"></div>',iconSize:[16,16],iconAnchor:[8,8]});
+      myLocMarker=L.marker([userLat,userLng],{icon,zIndexOffset:1000}).addTo(leafMap);
+      myLocMarker.bindPopup('<strong>You are here</strong>');
+      updateMap(latestPosts);
+      toast('✓ Location set');
+    },()=>{mlb.textContent='📌 My Location';toast('Could not get location','err');});
+  };
+
   updateMap(latestPosts);
 }
 function updateMap(data){
@@ -1067,16 +1130,66 @@ function updateMap(data){
   if(!data)return;
   const bounds=[];
   Object.entries(data).forEach(([id,p])=>{
-    if(!p.lat||!p.lng)return;if(p.expiresAt&&p.expiresAt<=Date.now())return;
-    const inRange=isInRange(p);
-    if(!inRange)return; // completely hide out-of-range pins
+    if(!p.lat||!p.lng)return;
+    if(p.expiresAt&&p.expiresAt<=Date.now())return;
+    if(!isInRange(p))return;
+    // Apply map filters
+    if(mapFilterType!=='All'&&(p.helpType||'Other')!==mapFilterType)return;
+    if(mapFilterStatus==='open'&&p.volunteered)return;
+    if(mapFilterStatus==='urgent'&&!p.urgent)return;
+    if(mapFilterStatus==='done'&&!p.volunteered)return;
+
     const color=p.urgent?"#dc2626":(p.volunteered?"#3a6b4a":"#c9922b");
-    const icon=L.divIcon({className:"",html:`<div style="width:14px;height:14px;border-radius:50%;background:${color};border:2px solid #fff;box-shadow:0 1px 5px rgba(0,0,0,.35)"></div>`,iconSize:[14,14],iconAnchor:[7,7]});
+    const size=p.urgent?18:14;
+    const icon=L.divIcon({className:"",html:`<div style="width:${size}px;height:${size}px;border-radius:50%;background:${color};border:2.5px solid #fff;box-shadow:0 1px 6px rgba(0,0,0,.4);cursor:pointer"></div>`,iconSize:[size,size],iconAnchor:[size/2,size/2]});
     const m=L.marker([p.lat,p.lng],{icon}).addTo(leafMap);
-    m.bindPopup(`<strong style="font-family:serif">${p.title}</strong><br><small>${esc(p.helpType)} · ${esc(p.posterName)}</small>`);
+
+    // Click pin → show card drawer instead of popup
+    m.on('click',()=>showMapCard(id,p));
     leafMarkers[id]=m;bounds.push([p.lat,p.lng]);
   });
   if(bounds.length){if(bounds.length===1)leafMap.setView(bounds[0],13);else leafMap.fitBounds(bounds,{padding:[40,40]});}
+}
+
+function showMapCard(id,p){
+  const drawer=document.getElementById('mapCardDrawer');
+  if(!drawer)return;
+  const dist=(p.lat&&p.lng&&userLat&&userLng)?`${distMiles(userLat,userLng,p.lat,p.lng).toFixed(1)} mi away`:'';
+  const statusChip=p.volunteered
+    ?`<span class="chip chip-done" style="font-size:.75rem">✓ ${esc(p.volunteerName||'Volunteer')} helping</span>`
+    :`<span class="chip chip-open" style="font-size:.75rem">Needs help</span>`;
+  const urgentBadge=p.urgent?`<span class="chip chip-urgent" style="font-size:.72rem">● URGENT</span>`:'';
+  drawer.hidden=false;
+  drawer.innerHTML=`
+    <button class="map-drawer-close" onclick="document.getElementById('mapCardDrawer').hidden=true">✕</button>
+    <div class="map-drawer-title">${esc(p.title)}</div>
+    <div class="map-drawer-meta">
+      <span class="chip chip-type" style="font-size:.75rem">${esc(p.helpType||'Other')}</span>
+      ${urgentBadge}${statusChip}
+      ${dist?`<span style="font-size:.78rem;color:var(--muted)">📍 ${dist}</span>`:''}
+    </div>
+    <div class="map-drawer-body">${esc(p.description)}</div>
+    <div class="map-drawer-actions">
+      ${!p.volunteered?`<button class="btn-help" style="font-size:.85rem" onclick="volunteerFromMap('${id}')">I Can Help</button>`:''}
+      <button class="btn-comments" style="font-size:.85rem" onclick="document.getElementById('helpTab').click();setTimeout(()=>{const c=document.querySelector('[data-id=\'${id}\']');if(c)c.scrollIntoView({behavior:'smooth',block:'center'});},400)">View full post ↗</button>
+    </div>`;
+  // Scroll drawer into view on mobile
+  setTimeout(()=>drawer.scrollIntoView({behavior:'smooth',block:'nearest'}),100);
+}
+
+async function volunteerFromMap(id){
+  if(!latestPosts||!latestPosts[id])return;
+  const p=latestPosts[id];
+  const result=await openModal({title:"Volunteer to Help",fields:[{id:"name",label:"Your name",required:true,placeholder:"Enter your name",max:40}],confirmText:"Volunteer"});
+  if(!result)return;
+  const name=(result.name||"").trim();
+  if(!name)return toast("Please enter your name.","err");
+  if(hasBad(name))return toast("Please keep it friendly!","err");
+  try{
+    await runTransaction(ref(db,`posts/${id}`),cur=>(!cur||cur.volunteered)?cur:{...cur,volunteered:true,volunteerName:name,volunteerAt:Date.now()});
+    toast("✓ Volunteered!");
+    document.getElementById('mapCardDrawer').hidden=true;
+  }catch{toast("Couldn't update.","err");}
 }
 
 // ── MODAL ─────────────────────────────────────────────────────
@@ -1882,6 +1995,25 @@ function downloadHoursPDF(){
 .rep-details{flex:1}
 .rep-details p{margin:0;font-size:.82rem;color:var(--muted)}
 .rep-breakdown{display:flex;gap:.5rem;flex-wrap:wrap;margin-top:.4rem}
+
+/* ── MAP IMPROVEMENTS ── */
+.map-controls{display:flex;gap:.5rem;margin-bottom:.75rem;flex-wrap:wrap;align-items:center}
+.map-filter-select{font:inherit;font-size:.85rem;padding:.38rem .65rem;border:1.5px solid var(--border);border-radius:8px;background:#fff;color:var(--bark);cursor:pointer}
+[data-theme="dark"] .map-filter-select{background:#2a211a;color:var(--bark);border-color:var(--border)}
+.btn-map-loc{background:var(--moss);color:#fff;border:none;border-radius:8px;padding:.38rem .85rem;font:inherit;font-size:.84rem;font-weight:600;cursor:pointer;white-space:nowrap;transition:background .15s;margin-left:auto}
+.btn-map-loc:hover{background:var(--moss2)}
+.btn-map-loc.got{background:#2d7d8a}
+
+/* Map card drawer — slides up when pin clicked */
+.map-card-drawer{background:var(--cream);border:1.5px solid var(--border);border-radius:14px;padding:1rem 1.2rem;margin-top:.75rem;position:relative;animation:fadeUp .2s ease}
+.map-drawer-close{position:absolute;top:.6rem;right:.75rem;background:none;border:none;cursor:pointer;font-size:1rem;color:var(--muted);padding:.2rem}
+.map-drawer-title{font-family:'Fraunces',serif;font-size:1.05rem;font-weight:600;color:var(--bark);margin:0 0 .3rem}
+.map-drawer-meta{font-size:.82rem;color:var(--muted);margin-bottom:.6rem;display:flex;gap:.5rem;flex-wrap:wrap;align-items:center}
+.map-drawer-body{font-size:.88rem;color:#4a3726;line-height:1.55;margin-bottom:.7rem}
+.map-drawer-actions{display:flex;gap:.5rem;flex-wrap:wrap}
+
+/* User location dot */
+.my-location-dot{width:16px;height:16px;border-radius:50%;background:#3b82f6;border:3px solid #fff;box-shadow:0 0 0 3px rgba(59,130,246,.3),0 1px 5px rgba(0,0,0,.3)}
 </style></head><body>
   <h1>✦ Helpy Volunteer Hours</h1>
   <h2>${userName} · Generated ${new Date().toLocaleDateString()}</h2>
