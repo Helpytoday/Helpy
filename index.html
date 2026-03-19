@@ -1522,7 +1522,7 @@ function renderProfile(user){
           </div>
         </li>`).join("")}
       </ul>
-      <button onclick="downloadHoursPDF()" style="margin-top:1rem;background:var(--moss);color:#fff;border:none;border-radius:10px;padding:.6rem 1.3rem;font:inherit;font-size:.88rem;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:.4rem;">⬇ Download Hours Certificate (PDF)</button>\`;
+      <button onclick="downloadHoursPDF()" style="margin-top:1rem;background:var(--moss);color:#fff;border:none;border-radius:10px;padding:.6rem 1.3rem;font:inherit;font-size:.88rem;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:.4rem;">⬇ Download Hours Certificate (PDF)</button>`;
   },{onlyOnce:true});
 
   if(myPosts.length){
@@ -1657,14 +1657,14 @@ function initLanding(){
   document.getElementById('landingSignIn').onclick=()=>{
     localStorage.setItem('nhn_landing_seen','1');
     hideLanding();
-    setTimeout(()=>{ el.authOverlay.hidden=false; switchAuthMode('signin'); },300);
+    setTimeout(()=>{ document.getElementById('authOverlay').hidden=false; switchAuthMode('signin'); },300);
   };
   // Create account buttons
   ['landingSignUp','landingGetStarted','landingCtaBtn'].forEach(id=>{
     document.getElementById(id).onclick=()=>{
       localStorage.setItem('nhn_landing_seen','1');
       hideLanding();
-      setTimeout(()=>{ el.authOverlay.hidden=false; switchAuthMode('signup'); },300);
+      setTimeout(()=>{ document.getElementById('authOverlay').hidden=false; switchAuthMode('signup'); },300);
     };
   });
   // Browse as guest
@@ -1742,7 +1742,7 @@ function downloadHoursPDF(){
 .legal-divider{height:1px;background:var(--border);margin:1rem 0}
 
 /* ── COOKIE CONSENT ── */
-#cookieConsent{position:fixed;inset:0;z-index:9999;background:rgba(30,20,10,.7);display:flex;align-items:center;justify-content:center;padding:1rem;backdrop-filter:blur(6px);animation:fadeIn .2s ease}
+
 .cookie-consent-box{background:var(--cream);border-radius:20px;padding:2rem;width:min(480px,100%);box-shadow:0 24px 64px rgba(0,0,0,.35);animation:slideUp .25s cubic-bezier(.34,1.3,.64,1);position:relative}
 .cookie-consent-box h2{font-family:'Fraunces',serif;font-size:1.35rem;font-weight:700;margin:0 0 .5rem;color:var(--bark)}
 .cookie-consent-box p{font-size:.88rem;color:var(--muted);line-height:1.65;margin:0 0 .6rem}
@@ -1869,6 +1869,13 @@ function downloadHoursPDF(){
 
 
 // ── COOKIE CONSENT ───────────────────────────────────────────
+function disableNonEssentialStorage(){
+  // On decline, clear non-essential keys but keep consent record
+  ['nhn_last_post_at','nhn_seen_count','nhn_landing_seen'].forEach(k => localStorage.removeItem(k));
+  // Remove all msg_read_ keys
+  Object.keys(localStorage).filter(k => k.startsWith('msg_read_')).forEach(k => localStorage.removeItem(k));
+}
+
 function initCookieConsent(){
   const consent = localStorage.getItem('nhn_cookie_consent');
   const box = document.getElementById('cookieConsent');
@@ -1901,12 +1908,10 @@ function initCookieConsent(){
   };
 }
 
-function disableNonEssentialStorage(){
-  // On decline, clear non-essential keys but keep consent record
-  ['nhn_last_post_at','nhn_seen_count','nhn_landing_seen'].forEach(k => localStorage.removeItem(k));
-  // Remove all msg_read_ keys
-  Object.keys(localStorage).filter(k => k.startsWith('msg_read_')).forEach(k => localStorage.removeItem(k));
-}
+
+// Run cookie consent and landing immediately on load, independent of Firebase
+initCookieConsent();
+initLanding();
 
 // ── INIT ──────────────────────────────────────────────────────
 function init(){
@@ -2078,10 +2083,8 @@ function init(){
 
 
 
-  initCookieConsent();
   initSidebar();
   initFeedback();
-  initLanding();
 
   // Deep link: ?post=ID
   const urlPost = new URLSearchParams(location.search).get('post');
@@ -2204,7 +2207,7 @@ init();
 
     <div class="legal-divider"></div>
     <h3>6. Contact</h3>
-        <p>Questions? Email us at <a href="mailto:hello@helpy.app" style="color:var(--moss)">hello@helpy.app</a>.</p>
+                <p>Questions? Email us at <a href="mailto:hello@helpy.app" style="color:var(--moss)">hello@helpy.app</a>.</p>
   </div>
 </div>
 
