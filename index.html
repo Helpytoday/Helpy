@@ -531,6 +531,34 @@ button{font:inherit;cursor:pointer;border:none;border-radius:10px;font-weight:60
 
 /* User location dot */
 .my-location-dot{width:16px;height:16px;border-radius:50%;background:#3b82f6;border:3px solid #fff;box-shadow:0 0 0 3px rgba(59,130,246,.3),0 1px 5px rgba(0,0,0,.3)}
+
+/* ── LEADERBOARD ── */
+.leaderboard-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:1.2rem}
+.leaderboard-table{width:100%;border-collapse:collapse;margin-top:.5rem}
+.leaderboard-table th{font-size:.82rem;font-weight:600;color:var(--muted);text-align:left;padding:.45rem .6rem;border-bottom:2px solid var(--border)}
+.leaderboard-table td{font-size:.9rem;padding:.65rem .6rem;border-bottom:1px solid var(--border);color:var(--bark)}
+.leaderboard-table tr:last-child td{border-bottom:none}
+.leaderboard-table tr:hover td{background:rgba(58,107,74,.05)}
+.lb-rank{font-family:'Fraunces',serif;font-weight:700;font-size:1.05rem;width:36px}
+.lb-rank-1{color:#ffd700}.lb-rank-2{color:#9e9e9e}.lb-rank-3{color:#cd7f32}
+.lb-name{font-weight:600}
+.lb-count{text-align:center;font-weight:700;color:var(--moss)}
+.lb-hours{text-align:center;color:var(--sky);font-weight:600}
+.lb-empty{text-align:center;padding:2rem;color:var(--muted);font-size:.92rem;font-style:italic}
+.lb-tabs{display:flex;gap:.4rem;margin-bottom:1rem}
+.lb-tab{background:#f0ede8;border:none;border-radius:8px;padding:.35rem .85rem;font:inherit;font-size:.85rem;font-weight:600;color:var(--bark2);cursor:pointer;transition:all .15s}
+.lb-tab.active{background:var(--bark);color:var(--sand)}
+[data-theme="dark"] .lb-tab{background:#2a211a}
+[data-theme="dark"] .lb-tab.active{background:var(--bark)}
+
+
+/* ── LANDING STATS ── */
+.landing-stats{background:var(--bark);padding:2rem;display:flex;justify-content:center;gap:3rem;flex-wrap:wrap}
+.landing-stat{text-align:center}
+.landing-stat-num{font-family:'Fraunces',serif;font-size:2.4rem;font-weight:700;color:var(--sand);line-height:1}
+.landing-stat-lbl{font-size:.82rem;color:#b8a98e;margin-top:.3rem;font-weight:500}
+@media(max-width:520px){.landing-stats{gap:1.5rem;padding:1.5rem 1rem}.landing-stat-num{font-size:1.8rem}}
+
 </style>
 </head>
 <body>
@@ -576,6 +604,9 @@ button{font:inherit;cursor:pointer;border:none;border-radius:10px;font-weight:60
     </button>
     <button id="mapTab" class="tab" type="button" title="Map View">
       <span>▦</span><span class="tab-label">Map</span>
+    </button>
+    <button id="lbTab" class="tab" type="button" title="Leaderboard">
+      <span>🏆</span><span class="tab-label">Top</span>
     </button>
   </div>
   <div class="sidebar-bottom"><button class="about-app-link" onclick="document.getElementById('aboutOverlay').hidden=false" title="About Helpy">ⓘ</button>
@@ -720,6 +751,21 @@ button{font:inherit;cursor:pointer;border:none;border-radius:10px;font-weight:60
     <div id="mapCardDrawer" class="map-card-drawer" hidden></div>
     <p class="map-note">● Red = Urgent &nbsp;·&nbsp; ◎ Yellow = Open &nbsp;·&nbsp; ✓ Green = Filled</p>
   </section>
+  <section id="lbPanel" class="panel" hidden>
+    <div class="leaderboard-header">
+      <p class="panel-title" style="margin:0">🏆 Top Volunteers</p>
+    </div>
+    <div class="lb-tabs">
+      <button class="lb-tab active" id="lbTabTasks">Most Tasks</button>
+      <button class="lb-tab" id="lbTabHours">Most Hours</button>
+    </div>
+    <div id="lbContent">
+      <table class="leaderboard-table">
+        <thead><tr><th class="lb-rank">#</th><th>Volunteer</th><th class="lb-count">Tasks</th></tr></thead>
+        <tbody id="lbBody"><tr><td colspan="3" class="lb-empty">Loading…</td></tr></tbody>
+      </table>
+    </div>
+  </section>
   <section id="profilePanel" class="panel" hidden>
     <div id="profileContent"></div>
   </section>
@@ -777,6 +823,21 @@ button{font:inherit;cursor:pointer;border:none;border-radius:10px;font-weight:60
     </div>
   </div>
 
+
+  <div class="landing-stats" id="landingStats">
+    <div class="landing-stat">
+      <div class="landing-stat-num" id="statPosts">—</div>
+      <div class="landing-stat-lbl">Requests posted</div>
+    </div>
+    <div class="landing-stat">
+      <div class="landing-stat-num" id="statVolunteers">—</div>
+      <div class="landing-stat-lbl">Neighbors helped</div>
+    </div>
+    <div class="landing-stat">
+      <div class="landing-stat-num" id="statHours">—</div>
+      <div class="landing-stat-lbl">Volunteer hours logged</div>
+    </div>
+  </div>
   <div class="landing-posts">
     <h2>See what's happening in your neighborhood</h2>
     <div class="landing-mockup">
@@ -1073,9 +1134,12 @@ function toast(msg,kind="ok"){
 function setTab(name){
   el.postPanel.hidden=name!=="post";el.helpPanel.hidden=name!=="help";
   el.mapPanel.hidden=name!=="map";el.profilePanel.hidden=name!=="profile";
+  const lbPanel=document.getElementById('lbPanel');if(lbPanel)lbPanel.hidden=name!=="lb";
   [el.postTab,el.helpTab,el.mapTab,el.profileTab].forEach(t=>t.classList.remove("active"));
-  ({post:el.postTab,help:el.helpTab,map:el.mapTab,profile:el.profileTab})[name].classList.add("active");
+  const lbTab=document.getElementById('lbTab');if(lbTab)lbTab.classList.remove("active");
+  ({post:el.postTab,help:el.helpTab,map:el.mapTab,profile:el.profileTab,lb:lbTab})[name]?.classList.add("active");
   if(name==="map")initMap();
+  if(name==="lb")renderLeaderboard();
 }
 
 // ── GEOCODE ───────────────────────────────────────────────────
@@ -1177,7 +1241,7 @@ function showMapCard(id,p){
   setTimeout(()=>drawer.scrollIntoView({behavior:'smooth',block:'nearest'}),100);
 }
 
-async function volunteerFromMap(id){
+window.volunteerFromMap = async function volunteerFromMap(id){
   if(!latestPosts||!latestPosts[id])return;
   const p=latestPosts[id];
   const result=await openModal({title:"Volunteer to Help",fields:[{id:"name",label:"Your name",required:true,placeholder:"Enter your name",max:40}],confirmText:"Volunteer"});
@@ -1897,7 +1961,7 @@ function clearHelpBadge(data){
 
 
 // ── HOURS PDF DOWNLOAD ────────────────────────────────────────
-function downloadHoursPDF(){
+window.downloadHoursPDF = function downloadHoursPDF(){
   const entries = window._hoursEntries || [];
   const userName = window._hoursUser || 'Volunteer';
   const totalH = entries.reduce((s,e)=>s+e.hours,0);
@@ -1918,103 +1982,7 @@ function downloadHoursPDF(){
   table{width:100%;border-collapse:collapse;font-size:.9rem}
   th{background:#3d2b1a;color:#fff;padding:.5rem .8rem;text-align:left}
   .footer{margin-top:2rem;font-size:.8rem;color:#7a6a57;border-top:1px solid #ddd;padding-top:1rem}
-  
-/* ── LEGAL MODALS ── */
-.legal-overlay{position:fixed;inset:0;background:rgba(30,20,10,.6);z-index:10000;display:flex;align-items:center;justify-content:center;padding:1rem;backdrop-filter:blur(4px);animation:fadeIn .18s ease}
-.legal-box{background:var(--cream);border-radius:20px;padding:2rem 2rem 1.5rem;width:min(620px,100%);max-height:85vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,.3);animation:slideUp .22s cubic-bezier(.34,1.3,.64,1);position:relative}
-.legal-box h2{font-family:'Fraunces',serif;font-size:1.4rem;font-weight:700;margin:0 0 .2rem;color:var(--bark)}
-.legal-box .legal-date{font-size:.8rem;color:var(--muted);margin:0 0 1.2rem}
-.legal-box h3{font-family:'Fraunces',serif;font-size:1rem;font-weight:600;margin:1.2rem 0 .4rem;color:var(--bark2)}
-.legal-box p,.legal-box li{font-size:.88rem;color:#4a3726;line-height:1.7;margin:.3rem 0}
-.legal-box ul{padding-left:1.2rem;margin:.3rem 0}
-.legal-close{position:absolute;top:.75rem;right:.75rem;background:none;border:none;cursor:pointer;font-size:1.2rem;color:var(--muted);padding:.2rem .4rem;border-radius:6px}
-.legal-close:hover{color:var(--bark)}
-.legal-divider{height:1px;background:var(--border);margin:1rem 0}
-
-/* ── COOKIE CONSENT ── */
-
-.cookie-consent-box{background:var(--cream);border-radius:20px;padding:2rem;width:min(480px,100%);box-shadow:0 24px 64px rgba(0,0,0,.35);animation:slideUp .25s cubic-bezier(.34,1.3,.64,1);position:relative}
-.cookie-consent-box h2{font-family:'Fraunces',serif;font-size:1.35rem;font-weight:700;margin:0 0 .5rem;color:var(--bark)}
-.cookie-consent-box p{font-size:.88rem;color:var(--muted);line-height:1.65;margin:0 0 .6rem}
-.cookie-consent-box a{color:var(--moss);text-decoration:none;font-weight:600}
-.cookie-consent-box a:hover{text-decoration:underline}
-.cookie-consent-actions{display:flex;gap:.7rem;margin-top:1.4rem;flex-wrap:wrap}
-.btn-cookie-accept{flex:1;background:var(--moss);color:#fff;border:none;border-radius:10px;padding:.7rem 1.2rem;font:inherit;font-size:.95rem;font-weight:600;cursor:pointer;transition:background .15s}
-.btn-cookie-accept:hover{background:var(--moss2)}
-.btn-cookie-decline{flex:1;background:#f0ede8;color:var(--bark2);border:1.5px solid var(--border);border-radius:10px;padding:.7rem 1.2rem;font:inherit;font-size:.95rem;font-weight:600;cursor:pointer;transition:all .15s}
-.btn-cookie-decline:hover{background:#e5e0d8;border-color:var(--muted)}
-.cookie-icon{font-size:2rem;margin-bottom:.6rem}
-
-/* ── DARK MODE ── */
-[data-theme="dark"]{
-  --sand:#1a1410;--cream:#221c16;--bark:#f5f0e8;--bark2:#d4c4b0;
-  --moss:#4a8b5a;--moss2:#3a6b4a;--sage:#6a8b6e;--border:#3d3028;
-  --muted:#9a8878;--ok-bg:#1a2e20;--ok-txt:#6abf7a;
-  --card-shadow:0 2px 20px rgba(0,0,0,.4);
-}
-[data-theme="dark"] body{background:var(--sand);color:var(--bark)}
-[data-theme="dark"] header{background:#0f0c09}
-[data-theme="dark"] .sidebar{background:#0f0c09}
-[data-theme="dark"] .tab{color:#8a7a6a}
-[data-theme="dark"] .tab.active{background:var(--moss)}
-[data-theme="dark"] input,[data-theme="dark"] select,[data-theme="dark"] textarea{background:#2a211a;border-color:var(--border);color:var(--bark)}
-[data-theme="dark"] .post-card{background:#2a211a;border-color:var(--border)}
-[data-theme="dark"] .post-card.is-urgent{background:#2a1a1a;border-color:#7a3333}
-[data-theme="dark"] .modal{background:var(--cream)}
-[data-theme="dark"] .auth-box,[data-theme="dark"] .legal-box,[data-theme="dark"] .about-box,[data-theme="dark"] .cookie-consent-box,[data-theme="dark"] .feedback-box{background:var(--cream)}
-[data-theme="dark"] .btn-google{background:#2a211a;color:var(--bark);border-color:var(--border)}
-[data-theme="dark"] .comment-item,[data-theme="dark"] .msg-item{background:#1a1410}
-[data-theme="dark"] .landing-step,[data-theme="dark"] .sample-card,[data-theme="dark"] .mockup-card{background:#2a211a}
-[data-theme="dark"] .landing-how{background:#1a1410}
-[data-theme="dark"] #map{filter:brightness(.85) saturate(.9)}
-[data-theme="dark"] .panel{background:var(--cream)}
-[data-theme="dark"] .profile-header,[data-theme="dark"] .hours-log-item{background:var(--sand)}
-[data-theme="dark"] .auth-explainer,[data-theme="dark"] .radius-field{background:var(--sand)}
-[data-theme="dark"] .mockup-browser{background:#1a1410}
-[data-theme="dark"] .mockup-body{background:var(--sand)}
-[data-theme="dark"] .mockup-bar{background:#0f0c09}
-[data-theme="dark"] .view-radius-bar{background:#2a211a}
-
-/* Dark mode toggle button */
-.dark-toggle{background:none;border:none;cursor:pointer;font-size:1.1rem;color:#b8a98e;padding:.3rem;border-radius:6px;transition:color .15s;line-height:1}
-.dark-toggle:hover{color:var(--sand)}
-
-/* ── PWA INSTALL BANNER ── */
-#pwaInstallBanner{position:fixed;bottom:5rem;left:50%;transform:translateX(-50%);background:var(--bark);color:var(--sand);padding:.7rem 1.2rem;border-radius:12px;font-size:.85rem;font-weight:500;z-index:800;display:none;align-items:center;gap:.8rem;box-shadow:0 4px 20px rgba(0,0,0,.25);white-space:nowrap}
-#pwaInstallBanner button.install-yes{background:var(--moss);color:#fff;border:none;border-radius:8px;padding:.35rem .9rem;font:inherit;font-size:.82rem;font-weight:600;cursor:pointer}
-#pwaInstallBanner button.install-no{background:none;border:none;color:#b8a98e;font:inherit;font-size:.82rem;cursor:pointer;padding:.35rem}
-
-/* ── REPUTATION SCORE ── */
-.rep-badge{display:inline-flex;align-items:center;gap:.3rem;background:linear-gradient(135deg,var(--moss),var(--moss2));color:#fff;border-radius:999px;padding:.2rem .65rem;font-size:.75rem;font-weight:700}
-.rep-badge.bronze{background:linear-gradient(135deg,#cd7f32,#a0522d)}
-.rep-badge.silver{background:linear-gradient(135deg,#9e9e9e,#757575)}
-.rep-badge.gold{background:linear-gradient(135deg,#ffd700,#ffa000);color:#3d2b1a}
-.rep-badge.green{background:linear-gradient(135deg,var(--moss),var(--moss2))}
-.rep-section{background:var(--sand);border-radius:12px;padding:1rem 1.2rem;margin-bottom:1.2rem;display:flex;align-items:center;gap:1rem;flex-wrap:wrap}
-.rep-score-big{font-family:'Fraunces',serif;font-size:2.2rem;font-weight:700;color:var(--moss);line-height:1}
-.rep-details{flex:1}
-.rep-details p{margin:0;font-size:.82rem;color:var(--muted)}
-.rep-breakdown{display:flex;gap:.5rem;flex-wrap:wrap;margin-top:.4rem}
-
-/* ── MAP IMPROVEMENTS ── */
-.map-controls{display:flex;gap:.5rem;margin-bottom:.75rem;flex-wrap:wrap;align-items:center}
-.map-filter-select{font:inherit;font-size:.85rem;padding:.38rem .65rem;border:1.5px solid var(--border);border-radius:8px;background:#fff;color:var(--bark);cursor:pointer}
-[data-theme="dark"] .map-filter-select{background:#2a211a;color:var(--bark);border-color:var(--border)}
-.btn-map-loc{background:var(--moss);color:#fff;border:none;border-radius:8px;padding:.38rem .85rem;font:inherit;font-size:.84rem;font-weight:600;cursor:pointer;white-space:nowrap;transition:background .15s;margin-left:auto}
-.btn-map-loc:hover{background:var(--moss2)}
-.btn-map-loc.got{background:#2d7d8a}
-
-/* Map card drawer — slides up when pin clicked */
-.map-card-drawer{background:var(--cream);border:1.5px solid var(--border);border-radius:14px;padding:1rem 1.2rem;margin-top:.75rem;position:relative;animation:fadeUp .2s ease}
-.map-drawer-close{position:absolute;top:.6rem;right:.75rem;background:none;border:none;cursor:pointer;font-size:1rem;color:var(--muted);padding:.2rem}
-.map-drawer-title{font-family:'Fraunces',serif;font-size:1.05rem;font-weight:600;color:var(--bark);margin:0 0 .3rem}
-.map-drawer-meta{font-size:.82rem;color:var(--muted);margin-bottom:.6rem;display:flex;gap:.5rem;flex-wrap:wrap;align-items:center}
-.map-drawer-body{font-size:.88rem;color:#4a3726;line-height:1.55;margin-bottom:.7rem}
-.map-drawer-actions{display:flex;gap:.5rem;flex-wrap:wrap}
-
-/* User location dot */
-.my-location-dot{width:16px;height:16px;border-radius:50%;background:#3b82f6;border:3px solid #fff;box-shadow:0 0 0 3px rgba(59,130,246,.3),0 1px 5px rgba(0,0,0,.3)}
-</style></head><body>
+  </style></head><body>
   <h1>✦ Helpy Volunteer Hours</h1>
   <h2>${userName} · Generated ${new Date().toLocaleDateString()}</h2>
   <div class="summary">
@@ -2025,114 +1993,87 @@ function downloadHoursPDF(){
   <table><thead><tr><th>Task</th><th>Helped</th><th>Date</th><th>Hours</th><th>Status</th></tr></thead>
   <tbody>${rows}</tbody></table>
   <div class="footer">Generated by Helpy · helpy-helpy.vercel.app · This document shows volunteer hours logged through the Helpy platform.</div>
-  
-<!-- Terms & Conditions -->
-<div id="termsOverlay" class="legal-overlay" hidden>
-  <div class="legal-box">
-    <button class="legal-close" onclick="document.getElementById('termsOverlay').hidden=true">✕</button>
-    <h2>Terms & Conditions</h2>
-    <p class="legal-date">Last updated: March 2026</p>
-
-    <h3>1. Acceptance of Terms</h3>
-    <p>By accessing or using Helpy ("the Service"), you agree to be bound by these Terms & Conditions. If you do not agree, please do not use the Service.</p>
-
-    <div class="legal-divider"></div>
-    <h3>2. What Helpy Is</h3>
-    <p>Helpy is a community platform that allows users to post requests for small acts of help and for other users to volunteer to fulfill those requests. Helpy is not a commercial service — it is a free community tool.</p>
-
-    <div class="legal-divider"></div>
-    <h3>3. User Responsibilities</h3>
-    <ul>
-      <li>You must be at least 13 years old to use Helpy.</li>
-      <li>You are responsible for all content you post.</li>
-      <li>You agree not to post false, harmful, offensive, or misleading requests.</li>
-      <li>You agree not to use Helpy for any commercial or illegal purpose.</li>
-      <li>You are solely responsible for any interactions with other users. Helpy does not vet or verify users.</li>
-    </ul>
-
-    <div class="legal-divider"></div>
-    <h3>4. Volunteer Hours</h3>
-    <p>Helpy provides a tool to log and track volunteer hours. We do not guarantee that logged hours will be accepted by any school, institution, or organization. It is the user's responsibility to verify requirements with their institution.</p>
-
-    <div class="legal-divider"></div>
-    <h3>5. Safety</h3>
-    <p>Helpy is not responsible for any harm, injury, or loss that occurs as a result of interactions arranged through the platform. Always use common sense and meet in safe, public places when helping strangers.</p>
-
-    <div class="legal-divider"></div>
-    <h3>6. Intellectual Property</h3>
-    <p>All content on Helpy (excluding user posts) is owned by Helpy. You may not copy, reproduce, or distribute it without permission.</p>
-
-    <div class="legal-divider"></div>
-    <h3>7. Disclaimers</h3>
-    <p>Helpy is provided "as is" without warranties of any kind. We do not guarantee uptime, data retention, or the accuracy of user-submitted content.</p>
-
-    <div class="legal-divider"></div>
-    <h3>8. Changes to Terms</h3>
-    <p>We may update these terms at any time. Continued use of the Service after changes constitutes acceptance of the new terms.</p>
-
-    <div class="legal-divider"></div>
-    <h3>9. Contact</h3>
-    <p>Questions? Email us at <a href="mailto:hello@helpy.app" style="color:var(--moss)">hello@helpy.app</a>.</p>
-  </div>
-</div>
-
-<!-- Cookie Policy -->
-<div id="cookieOverlay" class="legal-overlay" hidden>
-  <div class="legal-box">
-    <button class="legal-close" onclick="document.getElementById('cookieOverlay').hidden=true">✕</button>
-    <h2>Cookie Policy</h2>
-    <p class="legal-date">Last updated: March 2026</p>
-
-    <h3>1. What Are Cookies</h3>
-    <p>Cookies are small text files stored on your device. Helpy uses browser <strong>localStorage</strong> (similar to cookies) to store settings and preferences locally on your device.</p>
-
-    <div class="legal-divider"></div>
-    <h3>2. What We Store Locally</h3>
-    <ul>
-      <li><strong>nhn_client_id</strong> — A random ID to identify guest users so they can manage their own posts.</li>
-      <li><strong>nhn_last_post_at</strong> — Timestamp of your last post, used to enforce rate limiting.</li>
-      <li><strong>nhn_seen_count</strong> — Number of posts seen, used for the notification badge.</li>
-      <li><strong>nhn_landing_seen</strong> — Whether you've already seen the landing page.</li>
-      <li><strong>msg_read_[id]</strong> — Timestamps for marking messages as read.</li>
-    </ul>
-
-    <div class="legal-divider"></div>
-    <h3>3. Third-Party Services</h3>
-    <p>Helpy uses the following third-party services which may set their own cookies or store data:</p>
-    <ul>
-      <li><strong>Firebase (Google)</strong> — For authentication and real-time database. See <a href="https://policies.google.com/privacy" target="_blank" style="color:var(--moss)">Google's Privacy Policy</a>.</li>
-      <li><strong>Google Fonts</strong> — For typography. May log requests to Google servers.</li>
-      <li><strong>OpenStreetMap / Nominatim</strong> — For map tiles and geocoding.</li>
-      <li><strong>Leaflet.js</strong> — Open-source mapping library, no external tracking.</li>
-    </ul>
-
-    <div class="legal-divider"></div>
-    <h3>4. No Advertising Cookies</h3>
-    <p>Helpy does not use advertising cookies, tracking pixels, or sell any user data to third parties.</p>
-
-    <div class="legal-divider"></div>
-    <h3>5. Managing Storage</h3>
-    <p>You can clear all locally stored data at any time by clearing your browser's localStorage (Settings → Privacy → Clear browsing data).</p>
-
-    <div class="legal-divider"></div>
-    <h3>6. Contact</h3>
-    <p>Questions? Email us at <a href="mailto:hello@helpy.app" style="color:var(--moss)">hello@helpy.app</a>.</p>
-  </div>
-</div>
-
-
-<div id="pwaInstallBanner">
-  ✦ Add Helpy to your home screen
-  <button class="install-yes" id="pwaInstallBtn">Install</button>
-  <button class="install-no" id="pwaDismissBtn">✕</button>
-</div>
-</body></html>`;
+  </body></html>`;
   const win=window.open('','_blank');
   win.document.write(html);
   win.document.close();
   setTimeout(()=>win.print(),500);
 }
 
+
+
+// ── LEADERBOARD ───────────────────────────────────────────────
+let lbMode = 'tasks'; // 'tasks' or 'hours'
+
+function renderLeaderboard(){
+  const tbody = document.getElementById('lbBody');
+  if(!tbody) return;
+  if(!latestPosts){ tbody.innerHTML='<tr><td colspan="3" class="lb-empty">No data yet.</td></tr>'; return; }
+
+  if(lbMode === 'tasks'){
+    // Count volunteered tasks per volunteer name
+    const counts = {};
+    Object.values(latestPosts).forEach(p=>{
+      if(!p.volunteered || !p.volunteerName) return;
+      const n = p.volunteerName.trim();
+      counts[n] = (counts[n]||0) + 1;
+    });
+    const sorted = Object.entries(counts).sort((a,b)=>b[1]-a[1]).slice(0,10);
+    if(!sorted.length){ tbody.innerHTML='<tr><td colspan="3" class="lb-empty">No volunteers yet — be the first!</td></tr>'; return; }
+    tbody.innerHTML = sorted.map(([name,count],i)=>{
+      const rankCls = i===0?'lb-rank-1':i===1?'lb-rank-2':i===2?'lb-rank-3':'';
+      const medal = i===0?'🥇':i===1?'🥈':i===2?'🥉':i+1;
+      return `<tr><td class="lb-rank ${rankCls}">${medal}</td><td class="lb-name">${esc(name)}</td><td class="lb-count">${count}</td></tr>`;
+    }).join('');
+    // Update header
+    const lbContent = document.getElementById('lbContent');
+    if(lbContent) lbContent.querySelector('thead tr').innerHTML = '<th class="lb-rank">#</th><th>Volunteer</th><th class="lb-count">Tasks</th>';
+  } else {
+    // Hours mode — count total hours per volunteer name from posts hoursEntry
+    const hoursMap = {};
+    Object.values(latestPosts).forEach(p=>{
+      if(!p.hoursEntry || !p.volunteerName) return;
+      const n = p.volunteerName.trim();
+      hoursMap[n] = (hoursMap[n]||0) + (p.hoursEntry.hours||0);
+    });
+    const sorted = Object.entries(hoursMap).sort((a,b)=>b[1]-a[1]).slice(0,10);
+    if(!sorted.length){ tbody.innerHTML='<tr><td colspan="3" class="lb-empty">No hours logged yet.</td></tr>'; return; }
+    tbody.innerHTML = sorted.map(([name,hours],i)=>{
+      const rankCls = i===0?'lb-rank-1':i===1?'lb-rank-2':i===2?'lb-rank-3':'';
+      const medal = i===0?'🥇':i===1?'🥈':i===2?'🥉':i+1;
+      return `<tr><td class="lb-rank ${rankCls}">${medal}</td><td class="lb-name">${esc(name)}</td><td class="lb-hours">${hours}h</td></tr>`;
+    }).join('');
+    const lbContent = document.getElementById('lbContent');
+    if(lbContent) lbContent.querySelector('thead tr').innerHTML = '<th class="lb-rank">#</th><th>Volunteer</th><th class="lb-hours">Hours</th>';
+  }
+
+  // Wire tab buttons (always, since innerHTML may change)
+  const tasksBtn = document.getElementById('lbTabTasks');
+  const hoursBtn = document.getElementById('lbTabHours');
+  if(tasksBtn){
+    tasksBtn.onclick = () => { lbMode='tasks'; tasksBtn.classList.add('active'); hoursBtn.classList.remove('active'); renderLeaderboard(); };
+    hoursBtn.onclick = () => { lbMode='hours'; hoursBtn.classList.add('active'); tasksBtn.classList.remove('active'); renderLeaderboard(); };
+  }
+}
+
+// ── LIVE STATS (for landing page) ────────────────────────────
+function updateLandingStats(data){
+  const statPosts = document.getElementById('statPosts');
+  const statVols = document.getElementById('statVolunteers');
+  if(!statPosts || !statVols || !data) return;
+  const now = Date.now();
+  const allPosts = Object.values(data);
+  const activePosts = allPosts.filter(p=>!p.expiresAt||p.expiresAt>now);
+  const volunteered = allPosts.filter(p=>p.volunteered);
+  statPosts.textContent = activePosts.length || '0';
+  statVols.textContent = volunteered.length || '0';
+  // Hours from hoursEntry on posts
+  const hoursEl = document.getElementById('statHours');
+  if(hoursEl){
+    const totalHours = allPosts.reduce((s,p)=>s+(p.hoursEntry?.hours||0),0);
+    hoursEl.textContent = totalHours || '0';
+  }
+}
 
 // ── COOKIE CONSENT ───────────────────────────────────────────
 function disableNonEssentialStorage(){
@@ -2319,6 +2260,8 @@ function init(){
       renderFromData(latestPosts);updateMap(latestPosts);updateHelpBadge(latestPosts);
       checkVolunteerNotifs(latestPosts);
       checkCommentNotifs(latestPosts);
+      updateLandingStats(latestPosts);
+      if(document.getElementById('lbPanel')&&!document.getElementById('lbPanel').hidden)renderLeaderboard();
     });
     el.filterType.onchange=e=>{selFilter=e.target.value;renderFromData(latestPosts);};
     document.getElementById("searchInput").oninput=e=>{
@@ -2338,6 +2281,8 @@ function init(){
     el.helpTab.onclick=()=>{setTab("help");clearHelpBadge();};
     el.mapTab.onclick=()=>setTab("map");
     el.profileTab.onclick=()=>{setTab("profile");renderProfile(currentUser);};
+    const lbTabBtn=document.getElementById('lbTab');
+    if(lbTabBtn)lbTabBtn.onclick=()=>setTab("lb");
     // auth overlay is mandatory — no close button, no click-outside dismiss
     el.authTabSignIn.onclick=()=>switchAuthMode("signin");
     el.authTabSignUp.onclick=()=>switchAuthMode("signup");
@@ -2544,6 +2489,60 @@ init();
     <h3>9. Contact</h3>
         <p>Questions? Email us at <a href="mailto:hello@helpy.app" style="color:var(--moss)">hello@helpy.app</a>.</p>
   </div>
+</div>
+
+<!-- Cookie Policy -->
+<div id="cookieOverlay" class="legal-overlay" hidden>
+  <div class="legal-box">
+    <button class="legal-close" onclick="document.getElementById('cookieOverlay').hidden=true">✕</button>
+    <h2>Cookie Policy</h2>
+    <p class="legal-date">Last updated: March 2026</p>
+
+    <h3>1. What Are Cookies</h3>
+    <p>Cookies are small text files stored on your device. Helpy uses browser <strong>localStorage</strong> (similar to cookies) to store settings and preferences locally on your device.</p>
+
+    <div class="legal-divider"></div>
+    <h3>2. What We Store Locally</h3>
+    <ul>
+      <li><strong>nhn_client_id</strong> — A random ID to identify guest users so they can manage their own posts.</li>
+      <li><strong>nhn_last_post_at</strong> — Timestamp of your last post, used to enforce rate limiting.</li>
+      <li><strong>nhn_seen_count</strong> — Number of posts seen, used for the notification badge.</li>
+      <li><strong>nhn_landing_seen</strong> — Whether you've already seen the landing page.</li>
+      <li><strong>nhn_cookie_consent</strong> — Your cookie consent decision.</li>
+      <li><strong>nhn_theme</strong> — Your light/dark mode preference.</li>
+      <li><strong>nhn_pwa_dismissed</strong> — Whether you dismissed the app install banner.</li>
+      <li><strong>msg_read_[id]</strong> — Timestamps for marking messages as read.</li>
+    </ul>
+
+    <div class="legal-divider"></div>
+    <h3>3. Third-Party Services</h3>
+    <p>Helpy uses the following third-party services which may set their own cookies or store data:</p>
+    <ul>
+      <li><strong>Firebase (Google)</strong> — For authentication and real-time database. See <a href="https://policies.google.com/privacy" target="_blank" style="color:var(--moss)">Google's Privacy Policy</a>.</li>
+      <li><strong>Google Fonts</strong> — For typography. May log requests to Google servers.</li>
+      <li><strong>OpenStreetMap / Nominatim</strong> — For map tiles and geocoding.</li>
+      <li><strong>Leaflet.js</strong> — Open-source mapping library, no external tracking.</li>
+    </ul>
+
+    <div class="legal-divider"></div>
+    <h3>4. No Advertising Cookies</h3>
+    <p>Helpy does not use advertising cookies, tracking pixels, or sell any user data to third parties.</p>
+
+    <div class="legal-divider"></div>
+    <h3>5. Managing Storage</h3>
+    <p>You can clear all locally stored data at any time by clearing your browser's localStorage (Settings → Privacy → Clear browsing data).</p>
+
+    <div class="legal-divider"></div>
+    <h3>6. Contact</h3>
+    <p>Questions? Email us at <a href="mailto:hello@helpy.app" style="color:var(--moss)">hello@helpy.app</a>.</p>
+  </div>
+</div>
+
+<!-- PWA Install Banner -->
+<div id="pwaInstallBanner">
+  ✦ Add Helpy to your home screen
+  <button class="install-yes" id="pwaInstallBtn">Install</button>
+  <button class="install-no" id="pwaDismissBtn">✕</button>
 </div>
 
 </body>
