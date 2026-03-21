@@ -583,7 +583,6 @@ button{font:inherit;cursor:pointer;border:none;border-radius:10px;font-weight:60
     <div class="logo"><span style="font-size:1.1rem;opacity:.8">✦</span>&nbsp;Helpy<span>.</span></div>
     <div class="tagline">Help near. Help here.</div>
     
-    <button class="dark-toggle" id="darkToggle" title="Toggle dark mode">🌙</button>
     <div class="header-auth" id="headerAuth">
       <button class="btn-signin" id="headerSignInBtn">Sign in</button>
     </div>
@@ -606,13 +605,13 @@ button{font:inherit;cursor:pointer;border:none;border-radius:10px;font-weight:60
       <span>▦</span><span class="tab-label">Map</span>
     </button>
     <button id="lbTab" class="tab" type="button" title="Leaderboard">
-      <span>🏆</span><span class="tab-label">Top</span>
+      <span>★</span><span class="tab-label">Top</span>
     </button>
   </div>
   <div class="sidebar-bottom"><button class="about-app-link" onclick="document.getElementById('aboutOverlay').hidden=false" title="About Helpy">ⓘ</button>
     <div class="sidebar-divider"></div>
-    <button id="profileTab" class="tab" type="button" title="Profile">
-      <span>○</span><span class="tab-label">Profile</span>
+    <button id="profileTab" class="tab" type="button" title="Settings">
+      <span>⚙</span><span class="tab-label">Settings</span>
     </button>
   </div>
 </nav>
@@ -1652,11 +1651,23 @@ function updateHeaderAuth(user){
 function renderProfile(user){
   if(!user){
     el.profileContent.innerHTML=`
-      <div class="profile-gate">
-        <p>Sign in to manage your posts and profile.</p>
-        <button class="btn-primary" id="profileSignInBtn" style="width:auto;margin:0 auto">Sign in</button>
+      <p class="panel-title">⚙ Settings</p>
+      <div style="margin-bottom:1.5rem;padding-bottom:1.5rem;border-bottom:1px solid var(--border)">
+        <p class="profile-section-title">Profile</p>
+        <div class="profile-gate">
+          <p style="margin-top:0">Sign in to manage your profile and posts.</p>
+          <button class="btn-primary" id="profileSignInBtn" style="width:auto;margin:0 auto">Sign in</button>
+        </div>
+      </div>
+      <div>
+        <p class="profile-section-title">Appearance</p>
+        <div style="display:flex;align-items:center;justify-content:space-between;padding:.6rem .9rem;background:var(--sand);border-radius:10px">
+          <span style="font-size:.9rem;font-weight:600;color:var(--bark2)">Dark mode</span>
+          <button class="dark-toggle" id="darkToggle" title="Toggle dark mode" style="font-size:1.2rem;padding:.2rem .4rem">🌙</button>
+        </div>
       </div>`;
     document.getElementById("profileSignInBtn").onclick=showAuthOverlay;
+    attachDarkToggle();
     return;
   }
   const initials=(user.displayName||user.email||"?")[0].toUpperCase();
@@ -1669,6 +1680,9 @@ function renderProfile(user){
   const swatchesHTML=AVATAR_COLORS.map(c=>`<div class="avatar-swatch${c===userAvatarColor?" selected":""}" data-color="${c}" style="background:${c}" title="${c}"></div>`).join("");
 
   el.profileContent.innerHTML=`
+    <p class="panel-title">⚙ Settings</p>
+
+    <p class="profile-section-title">Profile</p>
     <div class="profile-header">
       ${avatarHTML}
       <div class="profile-info">
@@ -1693,7 +1707,13 @@ function renderProfile(user){
     <p class="profile-section-title" style="margin-top:1.5rem">Your Posts</p>
     ${myPosts.length===0?`<div class="empty-state"><p>— Nothing posted yet</p></div>`:""}
     <ul class="list" id="profilePostList"></ul>
-    <div style="margin-top:1.5rem;padding-top:1.2rem;border-top:1px solid var(--border)">
+
+    <div style="margin-top:1.8rem;padding-top:1.4rem;border-top:1px solid var(--border)">
+      <p class="profile-section-title">Appearance</p>
+      <div style="display:flex;align-items:center;justify-content:space-between;padding:.6rem .9rem;background:var(--sand);border-radius:10px;margin-bottom:1rem">
+        <span style="font-size:.9rem;font-weight:600;color:var(--bark2)">Dark mode</span>
+        <button class="dark-toggle" id="darkToggle" title="Toggle dark mode" style="font-size:1.2rem;padding:.2rem .4rem">🌙</button>
+      </div>
       <button class="btn-signout" style="border-color:var(--border);color:var(--bark2)" id="profileSignOutBtn">Sign out</button>
     </div>`;
 
@@ -1784,6 +1804,7 @@ function renderProfile(user){
     myPosts.sort((a,b)=>b[1].createdAt-a[1].createdAt).forEach(([id,p])=>ul.appendChild(makeCard(id,p)));
   }
   document.getElementById("profileSignOutBtn").onclick=()=>signOut(auth).then(()=>{toast("✓ Signed out");setTab("help");}).catch(()=>toast("Sign-out failed.","err"));
+  attachDarkToggle();
 }
 
 
@@ -2126,10 +2147,16 @@ setTimeout(() => initCookieConsent(), 5000);
 
 // ── DARK MODE ────────────────────────────────────────────────
 function initDarkMode(){
+  // Apply saved theme immediately (no button needed)
+  const saved = localStorage.getItem('nhn_theme') || 'light';
+  if(saved === 'dark') document.documentElement.setAttribute('data-theme','dark');
+  attachDarkToggle();
+}
+function attachDarkToggle(){
   const toggle = document.getElementById('darkToggle');
   if(!toggle) return;
-  const saved = localStorage.getItem('nhn_theme') || 'light';
-  if(saved === 'dark'){ document.documentElement.setAttribute('data-theme','dark'); toggle.textContent='☀️'; }
+  const isDarkNow = document.documentElement.getAttribute('data-theme') === 'dark';
+  toggle.textContent = isDarkNow ? '☀️' : '🌙';
   toggle.onclick = () => {
     const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
     if(isDark){
