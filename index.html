@@ -52,11 +52,11 @@
 }
 *,*::before,*::after{box-sizing:border-box}
 body{margin:0;font-family:'DM Sans',sans-serif;background:var(--sand);color:var(--bark);min-height:100vh}
-header{background:var(--bark);padding:0;position:sticky;top:0;z-index:100;box-shadow:0 2px 12px rgba(0,0,0,.18);height:var(--header-h);display:flex;align-items:center}
+header{background:var(--sand);padding:0;position:sticky;top:0;z-index:100;box-shadow:0 2px 12px rgba(0,0,0,.08);height:var(--header-h);display:flex;align-items:center;border-bottom:1px solid var(--border)}
 .header-inner{width:100%;padding:0 100px 0 100px;display:flex;align-items:center;justify-content:space-between;gap:1rem;height:100%}
-.logo{font-family:'Fraunces',serif;font-size:1.5rem;font-weight:700;color:var(--sand);letter-spacing:-.02em;width:100px;min-width:100px;flex-shrink:0;display:flex;align-items:center;justify-content:center;padding:0}
+.logo{font-family:'Fraunces',serif;font-size:1.5rem;font-weight:700;color:var(--bark);letter-spacing:-.02em;width:100px;min-width:100px;flex-shrink:0;display:flex;align-items:center;justify-content:center;padding:0}
 .logo span{color:var(--sage)}
-.tagline{color:#b8a98e;font-size:1.05rem}
+.tagline{color:var(--muted);font-size:1.05rem}
 .app-layout{display:flex;min-height:100vh}
 .sidebar{width:100px;background:var(--bark);display:flex;flex-direction:column;align-items:center;padding:1.2rem 0;gap:.3rem;position:sticky;top:var(--header-h);height:calc(100vh - var(--header-h));flex-shrink:0;z-index:50;align-self:stretch}
 .sidebar-main{display:flex;flex-direction:column;gap:.4rem;align-items:center;flex:1}
@@ -202,12 +202,12 @@ button{font:inherit;cursor:pointer;border:none;border-radius:10px;font-weight:60
 .header-auth{display:flex;align-items:center;gap:.7rem}
 .btn-signin{background:var(--moss);color:#fff;border:none;border-radius:8px;padding:.42rem 1rem;font-size:.85rem;font-weight:600;cursor:pointer;font:inherit;white-space:nowrap;transition:background .15s}
 .btn-signin:hover{background:var(--moss2)}
-.btn-signout{background:transparent;color:#b8a98e;border:1.5px solid rgba(255,255,255,.2);border-radius:8px;padding:.38rem .85rem;font-size:.82rem;font-weight:600;cursor:pointer;font:inherit;white-space:nowrap;transition:all .15s}
+.btn-signout{background:transparent;color:var(--muted);border:1.5px solid var(--border);border-radius:8px;padding:.38rem .85rem;font-size:.82rem;font-weight:600;cursor:pointer;font:inherit;white-space:nowrap;transition:all .15s}
 .btn-signout:hover{border-color:var(--sage);color:var(--sand)}
 .header-user{display:flex;align-items:center;gap:.55rem}
 .header-avatar{width:28px;height:28px;border-radius:50%;border:2px solid var(--sage);object-fit:cover;flex-shrink:0}
 .header-avatar-ph{width:28px;height:28px;border-radius:50%;background:var(--moss);border:2px solid var(--sage);display:flex;align-items:center;justify-content:center;font-size:.8rem;font-weight:700;color:#fff;flex-shrink:0}
-.header-name{font-size:.85rem;font-weight:600;color:var(--sand);max-width:100px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.header-name{font-size:.85rem;font-weight:600;color:var(--bark);max-width:100px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 /* Auth overlay */
 .auth-overlay{position:fixed;inset:0;background:rgba(30,20,10,.6);z-index:400;display:flex;align-items:center;justify-content:center;padding:1rem;backdrop-filter:blur(4px);animation:fadeIn .18s ease}
 .auth-box{background:var(--cream);border-radius:20px;padding:2rem;width:min(400px,100%);box-shadow:0 20px 60px rgba(0,0,0,.3);animation:slideUp .22s cubic-bezier(.34,1.3,.64,1)}
@@ -470,10 +470,7 @@ button{font:inherit;cursor:pointer;border:none;border-radius:10px;font-weight:60
   --card-shadow:0 2px 20px rgba(0,0,0,.4);
 }
 [data-theme="dark"] body{background:var(--sand);color:var(--bark)}
-[data-theme="dark"] header{background:#3d2b1a}
-[data-theme="dark"] header .logo{color:#f5f0e8}
 [data-theme="dark"] header .logo span{color:#8aab8e}
-[data-theme="dark"] header .tagline{color:#b8a98e}
 [data-theme="dark"] .sidebar{background:#0f0c09}
 [data-theme="dark"] .tab{color:#8a7a6a}
 [data-theme="dark"] .tab.active{background:var(--moss)}
