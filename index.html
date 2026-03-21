@@ -493,8 +493,13 @@ button{font:inherit;cursor:pointer;border:none;border-radius:10px;font-weight:60
 [data-theme="dark"] .view-radius-bar{background:#2a211a}
 
 /* Dark mode toggle button */
-.dark-toggle{background:none;border:none;cursor:pointer;font-size:1.1rem;color:#b8a98e;padding:.3rem;border-radius:6px;transition:color .15s;line-height:1}
-.dark-toggle:hover{color:var(--sand)}
+/* ── DARK MODE TOGGLE SWITCH ── */
+.toggle-switch{position:relative;display:inline-block;width:44px;height:24px;flex-shrink:0}
+.toggle-switch input{opacity:0;width:0;height:0;position:absolute}
+.toggle-switch .track{position:absolute;inset:0;background:#b8a98e;border-radius:999px;transition:background .2s;cursor:pointer}
+.toggle-switch .track::after{content:'';position:absolute;width:18px;height:18px;border-radius:50%;background:#fff;top:3px;left:3px;transition:transform .2s;box-shadow:0 1px 3px rgba(0,0,0,.2)}
+.toggle-switch input:checked + .track{background:var(--moss)}
+.toggle-switch input:checked + .track::after{transform:translateX(20px)}
 
 /* ── PWA INSTALL BANNER ── */
 #pwaInstallBanner{position:fixed;bottom:5rem;left:50%;transform:translateX(-50%);background:var(--bark);color:var(--sand);padding:.7rem 1.2rem;border-radius:12px;font-size:.85rem;font-weight:500;z-index:800;display:none;align-items:center;gap:.8rem;box-shadow:0 4px 20px rgba(0,0,0,.25);white-space:nowrap}
@@ -1663,7 +1668,7 @@ function renderProfile(user){
         <p class="profile-section-title">Appearance</p>
         <div style="display:flex;align-items:center;justify-content:space-between;padding:.6rem .9rem;background:var(--sand);border-radius:10px">
           <span style="font-size:.9rem;font-weight:600;color:var(--bark2)">Dark mode</span>
-          <button class="dark-toggle" id="darkToggle" title="Toggle dark mode" style="font-size:1.2rem;padding:.2rem .4rem">🌙</button>
+          <label class="toggle-switch" id="darkToggle"><input type="checkbox" id="darkToggleInput"><span class="track"></span></label>
         </div>
       </div>`;
     document.getElementById("profileSignInBtn").onclick=showAuthOverlay;
@@ -1712,7 +1717,7 @@ function renderProfile(user){
       <p class="profile-section-title">Appearance</p>
       <div style="display:flex;align-items:center;justify-content:space-between;padding:.6rem .9rem;background:var(--sand);border-radius:10px;margin-bottom:1rem">
         <span style="font-size:.9rem;font-weight:600;color:var(--bark2)">Dark mode</span>
-        <button class="dark-toggle" id="darkToggle" title="Toggle dark mode" style="font-size:1.2rem;padding:.2rem .4rem">🌙</button>
+        <label class="toggle-switch" id="darkToggle"><input type="checkbox" id="darkToggleInput"><span class="track"></span></label>
       </div>
       <button class="btn-signout" style="border-color:var(--border);color:var(--bark2)" id="profileSignOutBtn">Sign out</button>
     </div>`;
@@ -2153,20 +2158,17 @@ function initDarkMode(){
   attachDarkToggle();
 }
 function attachDarkToggle(){
-  const toggle = document.getElementById('darkToggle');
-  if(!toggle) return;
+  const input = document.getElementById('darkToggleInput');
+  if(!input) return;
   const isDarkNow = document.documentElement.getAttribute('data-theme') === 'dark';
-  toggle.textContent = isDarkNow ? '☀️' : '🌙';
-  toggle.onclick = () => {
-    const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
-    if(isDark){
-      document.documentElement.removeAttribute('data-theme');
-      localStorage.setItem('nhn_theme','light');
-      toggle.textContent='🌙';
-    } else {
+  input.checked = isDarkNow;
+  input.onchange = () => {
+    if(input.checked){
       document.documentElement.setAttribute('data-theme','dark');
       localStorage.setItem('nhn_theme','dark');
-      toggle.textContent='☀️';
+    } else {
+      document.documentElement.removeAttribute('data-theme');
+      localStorage.setItem('nhn_theme','light');
     }
   };
 }
